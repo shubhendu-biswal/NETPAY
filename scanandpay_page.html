@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scan & Pay - NetPay</title>
+  <style>
+    :root {
+      --primary-color: #003087;
+      --light-bg: #f0f4ff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      color: #333;
+      background-color: white;
+    }
+     header {
+      background-color: #003087;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 30px;
+      height:74px;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+    }
+    .container {
+      background: #ccc;
+      padding: 20px;
+      max-width: 800px;
+      height: 720px;
+      margin-left: 350px;
+      margin-bottom: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      text-align: center;
+      }
+
+    video {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      display: inline-block;
+      margin: 8px 4px;
+      padding: 10px 20px;
+      background-color: #003087;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #002060;
+    }
+
+    #qrResult {
+      margin-top: 15px;
+      color: green;
+      font-weight: bold;
+      word-wrap: break-word;
+    }
+
+    canvas {
+      display: none;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    label.upload-label {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header><h1>📷 Scan & Pay</h1></header>
+  <div class="container">
+    <video id="camera" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+    <div>
+      <button class="btn" onclick="toggleFlash()">🔦 Flash</button>
+      <label class="upload-label">
+        📁 Upload QR from Gallery
+        <input type="file" accept="image/*" onchange="handleFile(event)">
+      </label>
+    </div>
+    <div id="qrResult">🔍 Waiting for scan...</div>
+  </div>
+
+  <!-- JSQR Library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+<script>
+  const video = document.getElementById("camera");
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const qrResult = document.getElementById("qrResult");
+
+  let stream, track;
+  let scanning = false;
+  let flashOn = false;
+
+  async function startCamera() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" }
+      });
+      video.srcObject = stream;
+      track = stream.getVideoTracks()[0];
+      scanning = true;
+      scanFrame();
+    } catch (err) {
+      qrResult.textContent = "❌ Camera access denied.";
+    }
+  }
+
+  async function scanFrame() {
+    if (!scanning) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, canvas.width, canvas.height, {
+      inversionAttempts: "dontInvert",
+    });
+
+    if (code) {
+      scanning = false;
+      qrResult.textContent = `✅ QR Code Detected: ${code.data}`;
+
+      // Trigger payment automatically
+      const amount = prompt("Enter amount to pay:");
+      if (!amount || isNaN(amount) || amount <= 0) {
+        qrResult.textContent = "❌ Invalid amount.";
+        scanning = true;
+        scanFrame();
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem("token"); // JWT token stored after login
+        const response = await fetch("http://localhost:5002/api/scanpay", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            receiverId: code.data,
+            amount: parseFloat(amount)
+          })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          qrResult.textContent = `✅ Payment Successful! Remaining Balance: ₹${data.senderBalance}`;
+          // Optionally redirect after 2-3 seconds
+          setTimeout(() => window.location.href = "/dashboard.html", 2500);
+        } else {
+          qrResult.textContent = `❌ Payment Failed: ${data.message}`;
+          scanning = true;
+          scanFrame();
+        }
+      } catch (err) {
+        qrResult.textContent = "❌ Server Error. Try again.";
+        scanning = true;
+        scanFrame();
+      }
+
+    } else {
+      requestAnimationFrame(scanFrame);
+    }
+  }
+
+  async function toggleFlash() {
+    if (!track) return;
+    const capabilities = track.getCapabilities();
+    if (!capabilities.torch) {
+      alert("❌ Flashlight not supported.");
+      return;
+    }
+    flashOn = !flashOn;
+    try {
+      await track.applyConstraints({ advanced: [{ torch: flashOn }] });
+    } catch (e) {
+      alert("Flash toggle failed.");
+    }
+  }
+
+  function handleFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, canvas.width, canvas.height, {
+          inversionAttempts: "dontInvert",
+        });
+        if (code) {
+          qrResult.textContent = `✅ QR from Image: ${code.data}`;
+        } else {
+          qrResult.textContent = "❌ No QR code found in image.";
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  startCamera();
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Train Ticket Booking - RailSwift</title>
+  <style>
+    :root {
+      --primary: #003087;
+      --light: #ffffff;
+      --gray: #f8f9fa;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      background: var(--gray);
+      color: #333;
+    }
+    header {
+      background-color: var(--primary);
+      color: var(--light);
+      text-align: center;
+      padding: 1rem 0;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px var(--shadow);
+    }
+    h2 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+    form {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    input, select {
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      grid-column: span 2;
+      padding: 0.75rem;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #002060;
+    }
+    .results {
+      margin-top: 2rem;
+    }
+    .train-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+    .train-info h3 {
+      color: var(--primary);
+    }
+    .book-btn {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Train Ticket Booking</h1>
+  </header>
+  <div class="container">
+    <h2>Search Trains</h2>
+    <form id="trainForm">
+      <input type="text" name="from" placeholder="From Station">
+      <input type="text" name="to" placeholder="To Station">
+       <input type="date" name="departureDate"/>
+      <input type="date" name="returnDate" />
+      <select>
+        <option value="general">General</option>
+        <option value="sleeper">Sleeper</option>
+        <option value="ac">AC</option>
+      </select>
+      <select>
+        <option value="1">1 Passenger</option>
+        <option value="2">2 Passengers</option>
+        <option value="3">3 Passengers</option>
+        <option value="4">4+ Passengers</option>
+      </select>
+      <button type="submit">Search Trains</button>
+    </form>
+    <div class="results" id="trainResults"></div>
+  </div>
+
+  <script>
+  const BASE_URL = "http://localhost:5002";
+
+document.getElementById("trainForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const from = this.from.value;
+    const to = this.to.value;
+    const departureDate = this.departureDate.value;
+
+    try {
+        const res = await fetch(`${BASE_URL}/api/trains/search?from=${from}&to=${to}&departureDate=${departureDate}`, {
+            headers: { "Cache-Control": "no-cache" }
+        });
+
+        const trains = await res.json();
+        const resultsDiv = document.getElementById("trainResults");
+
+        resultsDiv.innerHTML = trains.length ? trains.map(t => `
+            <div class="train-card">
+                <div class="train-info">
+                    <h3>${t.trainName} (${t.trainNumber})</h3>
+                    <p>${t.from} → ${t.to}</p>
+                    <p>${t.time} | Duration: ${t.duration}</p>
+                    <strong>Price: ${t.price}</strong>
+                </div>
+                <button class="book-btn">Book</button>
+            </div>
+        `).join('') : '<p>No trains found</p>';
+    } catch (err) {
+        console.error("❌ Error fetching trains:", err);
+    }
+});
+
+
+  </script>
+</body>
+</html>

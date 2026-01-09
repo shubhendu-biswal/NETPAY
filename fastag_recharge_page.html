@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FASTag Recharge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #003087;
+      --light-gray: #f5f5f5;
+      --card-radius: 12px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      color: #333;
+      background-color: white;
+    }
+     header {
+      background-color: #003087;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 30px;
+      height:74px;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      
+    }
+    .container {
+      max-width: 1400px;
+      margin-bottom: 30px;
+      margin-left: 60px;
+      background: white;
+      border-radius: var(--card-radius);
+      box-shadow: var(--box-shadow);
+      padding: 30px;
+    }
+
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .amount-options {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .amount-options button {
+      flex: 1;
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .amount-options button:hover {
+      background: #002570;
+    }
+
+    .submit-btn {
+      background: var(--primary-color);
+      color: white;
+      font-weight: bold;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .confirmation {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .confirmation.success {
+      background-color: #e0f9e0;
+      color: #2d7f2d;
+    }
+
+    .confirmation.fail {
+      background-color: #fde4e4;
+      color: #9d0000;
+    }
+
+    .history, .benefits {
+      margin-top: 30px;
+    }
+
+    .history table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history th, .history td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+
+    .benefits ul {
+      list-style: none;
+      margin-top: 10px;
+    }
+
+    .benefits li::before {
+      content: "🚗 ";
+    }
+
+    .receipt-btn {
+      margin-top: 10px;
+      background: #009688;
+    }
+
+    .receipt-btn:hover {
+      background: #00796b;
+    }
+
+    @media (max-width: 600px) {
+      .amount-options {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header><h1>FASTag Recharge</h1></header>
+  <div class="container">
+
+    <form id="fastagForm">
+      <label for="vehicleNumber">Vehicle Number</label>
+      <input type="text" id="vehicleNumber" required placeholder="e.g., OD02AB1234">
+
+      <label for="provider">Select FASTag Provider</label>
+      <select id="provider" required>
+        <option value="">-- Select Provider --</option>
+        <option>Axis Bank FASTag</option>
+        <option>SBI FASTag</option>
+        <option>HDFC FASTag</option>
+        <option>ICICI FASTag</option>
+        <option>Paytm FASTag</option>
+      </select>
+
+      <label for="customerId">Customer ID / Tag ID (Optional)</label>
+      <input type="text" id="customerId" placeholder="Optional">
+
+      <label for="amount">Recharge Amount</label>
+      <input type="number" id="amount" required placeholder="Enter amount or choose below">
+      <div class="amount-options">
+        <button type="button" onclick="setAmount(100)">₹100</button>
+        <button type="button" onclick="setAmount(200)">₹200</button>
+        <button type="button" onclick="setAmount(500)">₹500</button>
+      </div>
+
+      <button class="submit-btn" type="submit">Recharge Now</button>
+    </form>
+
+    <div id="confirmation" class="confirmation"></div>
+
+    <div class="history">
+      <h3>Recent Recharge History</h3>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Vehicle</th><th>Amount</th><th>Status</th></tr>
+        </thead>
+        <tbody class="historyBody" id="historyBody">
+          
+        </tbody>
+      </table>
+    </div>
+
+    <div class="benefits">
+      <h3>Why Use FASTag?</h3>
+      <ul>
+        <li>Skip the Toll Queue</li>
+        <li>Instant Online Recharge</li>
+        <li>Track Your Toll Payments</li>
+      </ul>
+    </div>
+
+    <button class="receipt-btn" onclick="window.print()">Print Receipt</button>
+  </div>
+
+  <script>
+    const BASE_URL = "http://localhost:5002/api/fastags";
+
+const form = document.getElementById("fastagForm");
+const messageEl = document.getElementById("confirmation"); // updated id
+const historyBody = document.getElementById("historyBody");
+
+let historyInterval; // for auto-refresh
+let isLoadingHistory = false; // prevent overlapping fetches
+let latestRechargeId = null; // track the newest recharge to highlight
+
+// Handle Recharge
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const data = {
+    vehicleNumber: document.getElementById("vehicleNumber").value,
+    provider: document.getElementById("provider").value,
+    customerId: document.getElementById("customerId").value,
+    amount: document.getElementById("amount").value,
+  };
+
+  try {
+    const res = await fetch(`${BASE_URL}/recharges`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+    if (result.success) {
+      // Show success message
+      messageEl.className = "confirmation success";
+      messageEl.innerText = result.message;
+      messageEl.style.display = "block";
+
+      latestRechargeId = result.recharge._id; // track the newest recharge
+      loadHistory(); // refresh immediately after recharge
+      form.reset();
+
+      // hide message after 5 seconds
+      setTimeout(() => {
+        messageEl.style.display = "none";
+      }, 5000);
+
+    } else {
+      // Show fail message
+      messageEl.className = "confirmation fail";
+      messageEl.innerText = result.message;
+      messageEl.style.display = "block";
+
+      setTimeout(() => {
+        messageEl.style.display = "none";
+      }, 5000);
+    }
+  } catch (err) {
+    console.error(err);
+    messageEl.className = "confirmation fail";
+    messageEl.innerText = "❌ Server error";
+    messageEl.style.display = "block";
+    setTimeout(() => {
+      messageEl.style.display = "none";
+    }, 5000);
+  }
+});
+
+// Load History
+async function loadHistory() {
+  if (isLoadingHistory) return; // prevent overlapping fetches
+  isLoadingHistory = true;
+
+  try {
+    const res = await fetch(`${BASE_URL}/histories?nocache=${Date.now()}`, { cache: "no-store" });
+    const result = await res.json();
+
+    if (result.success) {
+      historyBody.innerHTML = "";
+
+      result.histories.forEach(h => {
+        const isLatest = h._id === latestRechargeId; // highlight newest recharge
+        const row = `<tr style="${isLatest ? 'background-color: #e0f9e0; font-weight: bold;' : ''}">
+          <td>${new Date(h.date).toLocaleString()}</td>
+          <td>${h.vehicleNumber}</td>
+          <td>${h.provider}</td>
+          <td>${h.customerId || "-"}</td>
+          <td>₹${h.amount}</td>
+          <td>${h.status === "Success" ? "✅ Success" : "❌ Failed"}</td>
+        </tr>`;
+        historyBody.innerHTML += row;
+      });
+
+      // Reset highlight after first render
+      latestRechargeId = null;
+    }
+  } catch (err) {
+    console.error("Error loading history:", err);
+  } finally {
+    isLoadingHistory = false;
+  }
+}
+
+// Load history on page load
+loadHistory();
+
+// Auto-refresh every 10 seconds
+historyInterval = setInterval(loadHistory, 10000);
+
+
+  </script>
+</body>
+</html>

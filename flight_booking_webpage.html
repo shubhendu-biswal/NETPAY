@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Ticket Booking</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #003087;
+      --light: #ffffff;
+      --gray: #f4f4f4;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: var(--gray);
+      color: #333;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: var(--light);
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      background: var(--light);
+      padding: 2rem;
+      box-shadow: 0 4px 8px var(--shadow);
+      border-radius: 10px;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .search-form {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .search-form input, .search-form select {
+      padding: 0.7rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .search-form button {
+      grid-column: span 2;
+      background-color: var(--primary);
+      color: var(--light);
+      padding: 0.75rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .search-form button:hover {
+      background-color: #002060;
+    }
+
+    .flight-results {
+      margin-top: 2rem;
+    }
+
+    .flight-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 6px var(--shadow);
+    }
+
+    .flight-info {
+      flex: 1;
+    }
+
+    .flight-info h3 {
+      color: var(--primary);
+    }
+
+    .book-btn {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .book-btn:hover {
+      background-color: #002060;
+    }
+
+    @media(max-width: 768px) {
+      .flight-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Flight Ticket Booking</h1>
+  </header>
+
+  <div class="container">
+    <h2>Search Flights</h2>
+    <form class="search-form" id="searchForm">
+      <input type="text" name="from" placeholder="from(airport)"/>
+      <input type="text" name="to" placeholder="to(airport)"/>
+      <input type="date" name="departureDate"/>
+      <input type="date" name="returnDate" />
+      <select>
+        <option value="1">1 Passenger</option>
+        <option value="2">2 Passengers</option>
+        <option value="3">3 Passengers</option>
+        <option value="4">4+ Passengers</option>
+      </select>
+      <select>
+        <option value="Economy">Economy</option>
+        <option value="Business">Business</option>
+        <option value="First">First</option>
+      </select>
+      <button type="submit">🔍 Search Flights</button>
+    </form>
+
+    <div class="flight-results" id="flightResults"></div>
+  </div>
+
+  <script>
+   const BASE_URL = "http://localhost:5002";
+
+document.getElementById("searchForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+    const from = this.from.value;
+    const to = this.to.value;
+    const departureDate = this.departureDate.value;
+
+    try {
+        const res = await fetch(`${BASE_URL}/api/flights/search?from=${from}&to=${to}&departureDate=${departureDate}`,{
+
+        headers: {"Cache-Control": "no-cache"}
+
+    });
+        const flights = await res.json();
+        const resultsDiv = document.getElementById("flightResults");
+        resultsDiv.innerHTML = flights.length ? flights.map(f => `
+            <div class="flight-card">
+                <div class="flight-info">
+                    <h3>${f.airline} (${f.flightNumber})</h3>
+                    <p>${f.from} → ${f.to}</p>
+                    <p>${f.time} | ${f.duration}</p>
+                    <p>Class: ${f.class}</p>
+                    <strong>Price: ${f.price}</strong>
+                </div>
+                <button class="book-btn">Book</button>
+            </div>
+        `).join('') : '<p>No flights found</p>';
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+
+  </script>
+</body>
+</html>

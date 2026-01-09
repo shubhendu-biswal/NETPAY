@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mobile Recharge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #003087;
+      --light-bg: #f4f9ff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      color: #333;
+      background-color: white;
+    }
+    header {
+      background-color: #003087;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 30px;
+      height:74px;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      
+    }
+    .container {
+      max-width: 1400px;
+      margin-bottom: 30px;
+      margin-left: 60px;
+      background: white;
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      transition: border 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .plans {
+      margin-top: 20px;
+    }
+
+    .tab-buttons {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    .tab-buttons button {
+      flex: 1;
+      padding: 10px;
+      background: #eee;
+      border: none;
+      border-radius: 8px 8px 0 0;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .tab-buttons button.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .tab-content {
+      border: 1px solid #ccc;
+      border-top: none;
+      padding: 15px;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .plan-card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      background: #fafafa;
+      transition: transform 0.2s;
+    }
+
+    .plan-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .plan-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .plan-price {
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .submit-btn {
+      background: var(--primary-color);
+      color: white;
+      font-weight: bold;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .confirmation {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #e0f9e0;
+      color: #2d7f2d;
+    }
+
+    .history {
+      margin-top: 30px;
+    }
+
+    .history table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history th, .history td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+    .receipt-btn {
+      margin-top: 20px;
+      background: #009688;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .plan-card {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header><h1>📱 Mobile Recharge</h1></header>
+  <div class="container">
+    <form id="rechargeForm">
+      <label for="mobile">Mobile Number</label>
+      <input type="tel" id="mobile" name="mobileNumber" placeholder="Enter 10-digit mobile number" pattern="[0-9]{10}" required>
+
+      <label for="operator">Operator</label>
+      <select id="operator" required>
+        <option value="">-- Select Operator --</option>
+        <option>Jio</option>
+        <option>Airtel</option>
+        <option>VI</option>
+        <option>BSNL</option>
+      </select>
+
+      <label for="circle">Circle / Region</label>
+      <select id="circle" required>
+        <option value="">-- Select Region --</option>
+        <option>Delhi NCR</option>
+        <option>Mumbai</option>
+        <option>Odisha</option>
+        <option>Kolkata</option>
+      </select>
+
+      <label for="amount">Amount (₹)</label>
+      <input type="number" id="amount" placeholder="Enter recharge amount" required>
+
+      <div class="plans">
+        <div class="tab-buttons">
+          <button type="button" class="active" onclick="switchTab('prepaid',event)">Prepaid</button>
+          <button type="button" onclick="switchTab('postpaid' ,event)">Postpaid</button>
+        </div>
+        <div class="tab-content" id="prepaid">
+          <div class="plan-card">
+            <div class="plan-info">
+              <span>💰 Data Pack</span>
+              <small>1.5GB/day for 28 days</small>
+            </div>
+            <div class="plan-price">₹199</div>
+          </div>
+          <div class="plan-card">
+            <div class="plan-info">
+              <span>⚡ Unlimited Talktime</span>
+              <small>28 Days Validity</small>
+            </div>
+            <div class="plan-price">₹249</div>
+          </div>
+        </div>
+        <div class="tab-content" id="postpaid" style="display:none">
+          <div class="plan-card">
+            <div class="plan-info">
+              <span>💼 Corporate Plan</span>
+              <small>Unlimited Calls + 50GB Data</small>
+            </div>
+            <div class="plan-price">₹499</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="submit-btn" type="submit">Recharge Now</button>
+    </form>
+
+    <div id="confirmation" class="confirmation"></div>
+
+    <div class="history">
+      <h3>📜 Recharge History</h3>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Number</th><th>Amount</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          
+        </tbody>
+      </table>
+    </div>
+    <button class="receipt-btn" onclick="window.print()">Download/Print Receipt</button>
+  </div>
+
+  <script>
+  const BASE_URL = "http://localhost:5002/api/mobilerecharges";
+
+// Tab switch function
+function switchTab(tab, event) {
+  document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.tab-buttons button').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab).style.display = 'block';
+  event.target.classList.add('active');
+}
+
+// Load recharge history (only show success)
+async function loadHistory() {
+  const tbody = document.querySelector('.history tbody');
+  tbody.innerHTML = '';
+  try {
+    const res = await fetch(`${BASE_URL}/history`);
+    const data = await res.json();
+
+    if (data.success && data.recharges.length > 0) {
+      // Only display recharges with status "success"
+      const successRecharges = data.recharges.filter(r => r.status === "success");
+
+      if (successRecharges.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">No history found</td></tr>';
+        return;
+      }
+
+      successRecharges.forEach(r => {
+        const row = `<tr>
+          <td>${new Date(r.date).toLocaleDateString()}</td>
+          <td>${r.mobileNumber}</td>
+          <td>₹${r.amount}</td>
+          <td>✅ Success</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4">No history found</td></tr>';
+    }
+  } catch (err) { 
+    console.error(err); 
+  }
+}
+
+// Handle recharge form submission
+document.getElementById('rechargeForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const mobileNumber = document.getElementById('mobile').value;
+  const operator = document.getElementById('operator').value;
+  const circle = document.getElementById('circle').value;
+  const amount = document.getElementById('amount').value;
+  const confirmation = document.getElementById('confirmation');
+
+  if (!mobileNumber || !operator || !circle || !amount) {
+    confirmation.style.display = 'block';
+    confirmation.innerText = "❌ Please fill all fields";
+    return;
+  }
+
+  try {
+    // 1️⃣ Create recharge with empty status initially
+    let res = await fetch(`${BASE_URL}/recharge`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mobileNumber, operator, circle, amount: Number(amount), status: "" })
+    });
+    let data = await res.json();
+
+    if (data.success) {
+      const rechargeId = data.recharge._id;
+
+      // 2️⃣ Simulate payment success and update status in DB
+      await fetch(`${BASE_URL}/recharge/${rechargeId}/success`, { method: "POST" });
+
+      const txnId = 'MOB' + Math.floor(100000 + Math.random() * 900000);
+      confirmation.style.display = 'block';
+      confirmation.innerText = `✅ Recharge successful! Transaction ID: ${txnId}`;
+
+      document.getElementById('rechargeForm').reset();
+
+      // 3️⃣ Load updated history (will now show this recharge)
+      loadHistory();
+      setTimeout(() => confirmation.style.display = 'none', 5000);
+    } else {
+      confirmation.style.display = 'block';
+      confirmation.innerText = `❌ ${data.message}`;
+    }
+  } catch (err) {
+    console.error(err);
+    confirmation.style.display = 'block';
+    confirmation.innerText = "❌ Server error. Try again later.";
+  }
+});
+
+// Initial load of history
+loadHistory();
+
+  </script>
+</body>
+</html>

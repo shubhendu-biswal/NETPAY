@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pay to Bank - NetPay</title>
+  <style>
+    :root {
+      --primary-color: #003087;
+      --light-bg: #f0f4ff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      color: #333;
+      background-color: white;
+    }
+    header {
+      background-color: #003087;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 30px;
+      height:74px;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+    }
+    .container {
+      max-width: 1400px;
+      background: white;
+      margin-top: 50px;
+      margin-left: 65px;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    }
+
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .btn {
+      width: 100%;
+      background: #003087;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #002060;
+    }
+
+    .success, .error {
+      margin-top: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .recent {
+      margin-top: 30px;
+    }
+
+    .recent h3 {
+      margin-bottom: 10px;
+      color: #003087;
+    }
+
+    .recent-list {
+      list-style: none;
+      padding: 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .recent-item {
+      background: #f1f3f7;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .recent-item span {
+      display: block;
+      color: #444;
+      font-size: 15px;
+    }
+
+    .recent-item strong {
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <header><h1>🏦 Pay to Bank Account</h1></header>
+  <div class="container">
+    
+    <form onsubmit="return requestBankPin(event)">
+      <label for="accountNumber">Account Number</label>
+      <input type="text" id="accountNumber" placeholder="Enter account number" required />
+
+      <label for="ifscCode">IFSC Code</label>
+      <input type="text" id="ifscCode" placeholder="e.g., SBIN0001234" required />
+
+      <label for="amount">Amount (₹)</label>
+      <input type="number" id="amount" placeholder="Enter amount" min="1" required />
+
+      <label for="self">Transfer Type</label>
+      <select id="self">
+        <option value="other">To Other Account</option>
+        <option value="self">Self Transfer</option>
+      </select>
+
+      <button type="submit" class="btn">Proceed to Pay</button>
+    </form>
+
+    <div id="message"></div>
+
+    <div class="recent">
+      <h3>🕘 Recent Transfers</h3>
+      <ul class="recent-list" id="recentTransfers">
+        <!-- Recent payments will appear here -->
+      </ul>
+    </div>
+  </div>
+
+  <script>
+  const BASE_URL = "http://localhost:5002/api/bankaccounts";
+const correctPin = "2005";
+
+async function requestBankPin(e) {
+  e.preventDefault();
+  const account = document.getElementById("accountNumber").value.trim();
+  const ifsc = document.getElementById("ifscCode").value.trim().toUpperCase();
+  const amount = parseFloat(document.getElementById("amount").value.trim());
+  const type = document.getElementById("self").value;
+  const message = document.getElementById("message");
+
+  message.textContent = "";
+  message.className = "";
+
+  if (!/^\d{9,18}$/.test(account)) { message.textContent="❌ Invalid account number."; message.className="error"; return false; }
+  if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) { message.textContent="❌ Invalid IFSC code."; message.className="error"; return false; }
+  if (isNaN(amount) || amount <= 0) { message.textContent="❌ Amount must be greater than 0."; message.className="error"; return false; }
+
+  const pin = prompt("🔐 Enter 4-digit PIN to proceed:");
+  if (pin !== correctPin) { message.textContent="❌ Incorrect PIN. Payment cancelled."; message.className="error"; return false; }
+
+  try {
+    const res = await fetch(`${BASE_URL}/transfer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ account, ifsc, amount, type })
+    });
+    const data = await res.json();
+    if (data.success) {
+      message.innerHTML = `✅ ₹${amount.toFixed(2)} transferred to ${type==='self'?'your own':'account'} <strong>${account}</strong>!`;
+      message.className = "success";
+      document.getElementById("accountNumber").value = "";
+      document.getElementById("ifscCode").value = "";
+      document.getElementById("amount").value = "";
+      loadHistory(account);
+    } else {
+      message.textContent = "❌ " + data.message;
+      message.className = "error";
+    }
+  } catch (err) {
+    message.textContent = "❌ Server error. Try again later.";
+    message.className = "error";
+  }
+  return false;
+}
+
+async function loadHistory(account) {
+  try {
+    const res = await fetch(`${BASE_URL}/history/${account}`);
+    const data = await res.json();
+    const list = document.getElementById("recentTransfers");
+    list.innerHTML = "";
+    if (data.success && data.history.length > 0) {
+      data.history.forEach(txn => {
+        const item = document.createElement("li");
+        item.className = "recent-item";
+        item.innerHTML = `
+          <span><strong>IFSC:</strong> ${txn.ifsc}</span>
+          <span><strong>Type:</strong> ${txn.type==='self'?'Self Transfer':'Other Account'}</span>
+          <span><strong>Amount:</strong> ₹${txn.amount}</span>
+          <span class="small">${new Date(txn.time).toLocaleString()}</span>
+        `;
+        list.appendChild(item);
+      });
+    } else { list.innerHTML="<li>No recent transfers</li>"; }
+  } catch (err) { console.error(err); }
+}
+  </script>
+</body>
+</html>

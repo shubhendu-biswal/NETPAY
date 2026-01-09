@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel Booking</title>
+  <style>
+    :root {
+      --primary: #003087;
+      --light: #ffffff;
+      --gray: #f8f9fa;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      background: var(--gray);
+      color: #333;
+    }
+    header {
+      background-color: var(--primary);
+      color: var(--light);
+      text-align: center;
+      padding: 1rem 0;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px var(--shadow);
+    }
+    h2 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+    form {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    input, select {
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      grid-column: span 2;
+      padding: 0.75rem;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #002060;
+    }
+    .results {
+      margin-top: 2rem;
+    }
+    .hotel-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+    .hotel-info h3 {
+      color: var(--primary);
+    }
+    .book-btn {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hotel Room Booking</h1>
+  </header>
+  <div class="container">
+    <h2>Search Hotels</h2>
+    <form id="hotelForm">
+      <input type="text" name="city" placeholder="location">
+      <input type="date" name="checkInDate" placeholder="checkInDate">
+      <input type="date" name="checkOutDate" placeholder="checkOutDate">
+      <select name="rooms">
+        <option value="1">1 Room</option>
+        <option value="2">2 Rooms</option>
+        <option value="3">3 Rooms</option>
+        <option value="4">4+ Rooms</option>
+      </select>
+      <select name="guests">
+        <option value="1">1 Guest</option>
+        <option value="2">2 Guests</option>
+        <option value="3">3 Guests</option>
+        <option value="4">4+ Guests</option>
+      </select>
+      <button type="submit">Search Hotels</button>
+    </form>
+    <div class="results" id="hotelResults"></div>
+  </div>
+
+  <script>
+   const BASE_URL = "http://localhost:5002";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const hotelForm = document.getElementById("hotelForm");
+  const hotelResults = document.getElementById("hotelResults");
+
+  hotelForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // Get form values
+    const city = hotelForm.city.value.trim(); // use city to match backend
+    const checkInDate = hotelForm.checkInDate.value;
+    const checkOutDate = hotelForm.checkOutDate.value;
+    const rooms = hotelForm.rooms.value;
+    const guests = hotelForm.guests.value;
+
+    hotelResults.innerHTML = "<p>🔄 Searching hotels...</p>";
+
+    try {
+      // Build dynamic query (any field can be filled)
+      let queryParams = [];
+      if (city) queryParams.push(`city=${encodeURIComponent(city)}`);
+      if (checkInDate) queryParams.push(`checkInDate=${encodeURIComponent(checkInDate)}`);
+      if (checkOutDate) queryParams.push(`checkOutDate=${encodeURIComponent(checkOutDate)}`);
+      if (rooms) queryParams.push(`rooms=${encodeURIComponent(rooms)}`);
+      if (guests) queryParams.push(`guests=${encodeURIComponent(guests)}`);
+
+      if (queryParams.length === 0) {
+        hotelResults.innerHTML = "<p style='color:red;'>Please enter at least one search field.</p>";
+        return;
+      }
+
+      const res = await fetch(`${BASE_URL}/api/hotels/search?${queryParams.join("&")}`,
+      { headers: { "Cache-Control": "no-cache" } }
+    );
+      if (!res.ok) throw new Error("Failed to fetch hotels");
+
+      const data = await res.json();
+      hotelResults.innerHTML = "";
+
+      if (!data.length) {
+        hotelResults.innerHTML = "<p>No hotels found.</p>";
+        return;
+      }
+
+      // Display hotels
+      data.forEach((hotel) => {
+        const div = document.createElement("div");
+        div.classList.add("hotel-card");
+        div.innerHTML = `
+          <h3>${hotel.hotelName}</h3>
+          <p>Location: ${hotel.city}</p>
+          <p>Available Rooms: ${hotel.rooms}</p>
+          <p><strong>₹ ${hotel.pricePerNight}/night</strong></p>
+        `;
+        hotelResults.appendChild(div);
+      });
+    } catch (err) {
+      console.error(err);
+      hotelResults.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+    }
+  });
+});
+
+
+  </script>
+</body>
+</html>

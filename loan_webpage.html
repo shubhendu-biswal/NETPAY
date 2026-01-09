@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyLoan</title>
+  <style>
+    :root {
+      --primary: #003087;
+      --light: #ffffff;
+      --gray: #f5f7fa;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+     background-color: white;
+     color: black;
+    }
+    /* Add investment banner style */
+     header {
+      background-color: var(--primary);
+      color: var(--light);
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h2{
+      font-size: 32px;
+    }
+
+     .loan-options {
+      text-align: center;
+      padding: 50px 20px;
+      background: #f9f9f9;
+    }
+
+    .loan-options h2 {
+      font-size: 35px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .loan-options p {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 40px;
+    }
+
+    .loan-cards {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .loan-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      width: 260px;
+      height:300px;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    .loan-icon {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #003087;
+    }
+
+    .loan-icon.blue { background: #e0ecff; }
+    .loan-icon.green { background: #d3f6e7; color: #2e7d32; }
+    .loan-icon.yellow { background: #fff7d1; color: #f9a825; }
+    .loan-icon.purple { background: #f3e8fd; color: #8e24aa; }
+    .loan-icon.red { background: #ffe2e2; color: #d32f2f; }
+
+    .loan-card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .loan-card p {
+      font-size: 14px;
+      color: #444;
+      margin-bottom: 20px;
+    }
+
+    .loan-card a {
+      display: inline-block;
+      padding: 8px 16px;
+      border: 1px solid #003087;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #003087;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .loan-card a:hover {
+      background: #003087;
+      color: #fff;
+    }
+    .emi-sec{
+      background-color: #f8f9fa;
+      height: 700px;
+    }
+     h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    p.description {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #6c757d;
+    }
+
+    .calculator-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      
+    }
+
+    .form-section, .result-section {
+      flex: 1 1 400px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .slider-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .slider-wrapper {
+      margin-bottom: 30px;
+    }
+
+    .slider-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    .result-section {
+      background-color: #f1f3f5;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .result-section h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .emi-amount {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #003087;
+      margin-bottom: 10px;
+    }
+
+    .summary {
+      margin-top: 20px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      font-size: 1rem;
+    }
+
+    .summary-item span:last-child {
+      font-weight: 600;
+    }
+
+    .highlight {
+      color: #f59e0b;
+    }
+
+    .apply-btn {
+      display: inline-block;
+      width: 100%;
+      background-color: #003087;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 6px;
+      margin-top: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .apply-btn:hover {
+      background-color: #002266;
+    }
+
+    .why-netpay {
+      text-align: center;
+      padding: 60px 20px;
+      background-color: #fff;
+    }
+
+    .why-netpay h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: black;
+      margin-bottom: 10px;
+      
+    }
+
+    .why-netpay p.subtitle {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 50px;
+    }
+
+    .features-grid {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      
+      margin: auto;
+    }
+
+    .feature-box {
+      height:230px;
+      width: 250px;
+      text-align: center;
+      padding: 20px;
+      background-color: #f4f4f4;
+      border-radius: 16px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+    }
+
+    .feature-box:hover {
+      transform: translateY(-5px);
+    }
+
+    .icon-circle {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background-color: #003087;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .icon-circle img {
+      width: 34px;
+      height: 34px;
+      filter: brightness(0) invert(1); /* Make icons white */
+    }
+
+    .blue { background-color: #003087; }
+    .teal { background-color: #009688; }
+    .amber { background-color: #ffc107; }
+    .green { background-color: #4CAF50; }
+    .purple { background-color: #673ab7; }
+
+    .feature-box h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #222;
+    }
+
+    .feature-box p {
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    @media (max-width: 768px) {
+      .features-grid {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+    .applay-back{
+      background-color: #f8f9fa;
+      padding-top: 10px;
+      height:750px;
+    }
+    .container-applay {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    p.subtitle {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #666;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 250px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    input, select {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 5px rgba(0, 150, 136, 0.5);
+      outline: none;
+    }
+
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+    }
+
+    .form-checkbox input {
+      width: auto;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 14px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #002266;
+    }
+
+    .success {
+      background-color: #e0f7e9;
+      color: #006644;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        flex-direction: column;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      header nav {
+        margin-top: 10px;
+      }
+
+      header nav a {
+        margin-left: 0;
+        margin-right: 15px;
+      }
+
+      .container-applay {
+        margin: 20px;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+</head>
+
+<body>
+  <!-- Add investment banner -->
+  <header>
+      <h2>Quick Loans With NetPay</h2>
+      <p>Your trusted partner for hassle-free loans</p>
+  </header>
+  
+  <section class="loan-options">
+    <h2>Explore Loan Options</h2>
+    <p>Choose from our range of flexible loan products designed to meet your financial needs</p>
+    <div class="loan-cards">
+      <div class="loan-card">
+        <div class="loan-icon blue">👤</div>
+        <h3>Personal Loan</h3>
+        <p>Get up to ₹5 Lakhs for your personal needs with minimal documentation</p>
+        <a href="#">Check Eligibility</a>
+      </div>
+      <div class="loan-card">
+        <div class="loan-icon green">🏢</div>
+        <h3>Business Loan</h3>
+        <p>Expand your business with loans up to ₹50 Lakhs with flexible repayment</p>
+        <a href="#">Check Eligibility</a>
+      </div>
+      <div class="loan-card">
+        <div class="loan-icon yellow">🏠</div>
+        <h3>Home Loan</h3>
+        <p>Make your dream home a reality with competitive interest rates avilable</p>
+        <a href="#">Check Eligibility</a>
+      </div>
+      <div class="loan-card">
+        <div class="loan-icon purple">🚗</div>
+        <h3>Car Loan</h3>
+        <p>Drive your dream car with affordable EMIs and quick approvals</p>
+        <a href="#">Check Eligibility</a>
+      </div>
+      <div class="loan-card">
+        <div class="loan-icon red">🎓</div>
+        <h3>Education Loan</h3>
+        <p>Invest in your future with education loans for domestic and foreign studies</p>
+        <a href="#">Check Eligibility</a>
+      </div>
+    </div>
+  </section>
+  <div class="emi-sec">
+   <h1>EMI Calculator</h1>
+  <p class="description">Plan your loan repayment with our easy-to-use EMI calculator</p>
+
+  <div class="calculator-container">
+    <!-- Form Section -->
+    <div class="form-section">
+      <div class="slider-wrapper">
+        <label>Loan Amount</label>
+        <div class="slider-value">₹<span id="loanAmountDisplay">100000</span></div>
+        <input type="range" id="loanAmount" min="10000" max="5000000" step="1000" value="100000"/>
+        <div class="slider-footer">
+          <span>₹10,000</span>
+          <span>₹50,00,000</span>
+        </div>
+      </div>
+
+      <div class="slider-wrapper">
+        <label>Interest Rate (% per annum)</label>
+        <div class="slider-value"><span id="interestRateDisplay">10.5</span>%</div>
+        <input type="range" id="interestRate" min="5" max="24" step="0.1" value="10.5"/>
+        <div class="slider-footer">
+          <span>5%</span>
+          <span>24%</span>
+        </div>
+      </div>
+
+      <div class="slider-wrapper">
+        <label>Loan Tenure</label>
+        <div class="slider-value"><span id="loanTenureDisplay">12</span> months</div>
+        <input type="range" id="loanTenure" min="3" max="60" step="1" value="12"/>
+        <div class="slider-footer">
+          <span>3 months</span>
+          <span>60 months</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Section -->
+    <div class="result-section">
+      <h2>Your Loan Summary</h2>
+      <div class="emi-amount">₹<span id="emiResult">8,792</span></div>
+      <hr style="border: none; border-top: 4px solid #003087; margin-bottom: 20px;"/>
+      <div class="summary">
+        <div class="summary-item">
+          <span>Principal Amount</span>
+          <span>₹<span id="principalDisplay">100000</span></span>
+        </div>
+        <div class="summary-item">
+          <span>Total Interest</span>
+          <span class="highlight">₹<span id="interestDisplay">5504</span></span>
+        </div>
+        <div class="summary-item">
+          <span>Total Amount</span>
+          <span>₹<span id="totalDisplay">105504</span></span>
+        </div>
+      </div>
+      <button class="apply-btn">Apply for This Loan</button>
+    </div>
+  </div>
+  </div>
+  <section class="why-netpay">
+    <h2>Why Choose NetPay</h2>
+    <p class="subtitle">Experience hassle-free and secure loan services designed just for you</p>
+
+    <div class="features-grid">
+      <div class="feature-box">
+        <div class="icon-circle blue">
+          <img src="https://cdn-icons-png.flaticon.com/512/633/633759.png" alt="Quick Approval">
+        </div>
+        <h3>Quick Loan Approval</h3>
+        <p>Get approved in minutes with minimal documentation.</p>
+      </div>
+      <div class="feature-box">
+        <div class="icon-circle teal">
+          <img src="https://cdn-icons-png.flaticon.com/512/484/484167.png" alt="Low Interest">
+        </div>
+        <h3>Low Interest Rates</h3>
+        <p>Enjoy competitive interest rates starting from 10.5% p.a.</p>
+      </div>
+      <div class="feature-box">
+        <div class="icon-circle amber">
+          <img src="https://cdn-icons-png.flaticon.com/512/2089/2089644.png" alt="Flexible Repayment">
+        </div>
+        <h3>Flexible Repayment</h3>
+        <p>Choose loan tenure from 3 months to 5 years.</p>
+      </div>
+      <div class="feature-box">
+        <div class="icon-circle green">
+          <img src="https://cdn-icons-png.flaticon.com/512/1828/1828911.png" alt="Paperless">
+        </div>
+        <h3>100% Paperless</h3>
+        <p>Complete the entire process online, no physical paperwork needed.</p>
+      </div>
+      <div class="feature-box">
+        <div class="icon-circle purple">
+          <img src="https://cdn-icons-png.flaticon.com/512/2088/2088617.png" alt="Instant Disbursal">
+        </div>
+        <h3>Instant Disbursal</h3>
+        <p>Receive funds in your bank within 24 hours after approval.</p>
+      </div>
+    </div>
+  </section>
+  <div class="applay-back">
+  <div class="container-applay">
+    <h1>Apply for a Loan</h1>
+    <p class="subtitle">Fill in your details to start your loan application process.</p>
+
+    <form id="loanForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Full Name *</label>
+          <input type="text" id="name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Mobile Number *</label>
+          <input type="tel" id="phone" pattern="[0-9]{10}" required />
+        </div>
+        <div class="form-group">
+          <label for="loanType">Loan Type *</label>
+          <select id="loanType" required>
+            <option value="">Select</option>
+            <option>Personal</option>
+            <option>Home</option>
+            <option>Business</option>
+            <option>Education</option>
+            <option>Car</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="amount">Loan Amount (INR) *</label>
+          <input type="number" id="amount" min="1000" required />
+        </div>
+        <div class="form-group">
+          <label for="employment">Employment Status *</label>
+          <select id="employment" required>
+            <option value="">Select</option>
+            <option>Salaried</option>
+            <option>Self-Employed</option>
+            <option>Student</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="income">Monthly Income (INR) *</label>
+          <input type="number" id="income" min="0" required />
+        </div>
+        <div class="form-group">
+          <label for="documents">Upload Document (PAN/Aadhar – optional)</label>
+          <input type="file" id="documents" accept=".pdf,.jpg,.jpeg,.png" />
+        </div>
+      </div>
+
+      <div class="form-checkbox">
+        <input type="checkbox" id="terms" required />
+        <label for="terms">I agree to the Terms & Conditions *</label>
+      </div>
+
+      <button type="submit">Submit Application</button>
+      <div class="success" id="successMessage">
+        🎉 Your loan application has been submitted successfully!
+      </div>
+    </form>
+  </div>
+  </div>
+
+ <script>
+    const loanAmountSlider = document.getElementById('loanAmount');
+    const interestRateSlider = document.getElementById('interestRate');
+    const loanTenureSlider = document.getElementById('loanTenure');
+
+    const loanAmountDisplay = document.getElementById('loanAmountDisplay');
+    const interestRateDisplay = document.getElementById('interestRateDisplay');
+    const loanTenureDisplay = document.getElementById('loanTenureDisplay');
+
+    const emiResult = document.getElementById('emiResult');
+    const principalDisplay = document.getElementById('principalDisplay');
+    const interestDisplay = document.getElementById('interestDisplay');
+    const totalDisplay = document.getElementById('totalDisplay');
+
+    function formatINR(num) {
+      return Number(num).toLocaleString('en-IN');
+    }
+
+    function calculateEMI(P, r, n) {
+      r = r / (12 * 100); // Convert annual rate to monthly decimal
+      const emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      return emi;
+    }
+
+    function updateEMI() {
+      const P = parseInt(loanAmountSlider.value);
+      const r = parseFloat(interestRateSlider.value);
+      const n = parseInt(loanTenureSlider.value);
+
+      const emi = calculateEMI(P, r, n);
+      const totalAmount = emi * n;
+      const totalInterest = totalAmount - P;
+
+      loanAmountDisplay.textContent = formatINR(P);
+      interestRateDisplay.textContent = r.toFixed(1);
+      loanTenureDisplay.textContent = n;
+
+      emiResult.textContent = formatINR(emi.toFixed(0));
+      principalDisplay.textContent = formatINR(P);
+      interestDisplay.textContent = formatINR(totalInterest.toFixed(0));
+      totalDisplay.textContent = formatINR(totalAmount.toFixed(0));
+    }
+
+    loanAmountSlider.addEventListener('input', updateEMI);
+    interestRateSlider.addEventListener('input', updateEMI);
+    loanTenureSlider.addEventListener('input', updateEMI);
+
+    updateEMI(); // Initial calculation
+    document.getElementById("loanForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const requiredFields = ['name', 'email', 'phone', 'loanType', 'amount', 'employment', 'income'];
+      let isValid = true;
+
+      requiredFields.forEach(id => {
+        const input = document.getElementById(id);
+        if (!input.value.trim()) {
+          input.style.borderColor = 'red';
+          isValid = false;
+        } else {
+          input.style.borderColor = '#ccc';
+        }
+      });
+
+      if (!document.getElementById("terms").checked) {
+        alert("Please accept the Terms & Conditions");
+        return;
+      }
+
+      if (isValid) {
+        document.getElementById("successMessage").style.display = "block";
+        document.getElementById("loanForm").reset();
+      }
+    });
+  </script>
+</body>
+
+</html>

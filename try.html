@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signup Status</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f9fafb;
+    }
+    .container {
+      text-align: center;
+      padding: 30px;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      display: none; /* hidden until script shows it */
+    }
+    h1 { margin-bottom: 10px; }
+    p { color: #444; }
+    .success h1 { color: #16a34a; }
+    .error h1 { color: #dc2626; }
+  </style>
+</head>
+<body>
+  <!-- Success UI -->
+  <div id="successBox" class="container success">
+    <h1>🎉 Signup Successful!</h1>
+    <p>Redirecting to login in <span id="successCountdown">3</span> seconds...</p>
+  </div>
+
+  <!-- Error UI -->
+  <div id="errorBox" class="container error">
+    <h1>❌ Signup Failed</h1>
+    <p id="errorMessage">Unknown error occurred.</p>
+    <p>Redirecting back to signup in <span id="errorCountdown">3</span> seconds...</p>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("status");
+    const message = params.get("message");
+
+    if (status === "success") {
+      const box = document.getElementById("successBox");
+      const countdown = document.getElementById("successCountdown");
+      box.style.display = "block";
+
+      let timeLeft = 3;
+      const timer = setInterval(() => {
+        timeLeft--;
+        countdown.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          window.location.href = "login.html"; // auto redirect
+        }
+      }, 1000);
+
+    } else if (status === "error") {
+      const box = document.getElementById("errorBox");
+      const countdown = document.getElementById("errorCountdown");
+      box.style.display = "block";
+
+      if (message) {
+        document.getElementById("errorMessage").textContent = decodeURIComponent(message);
+      }
+
+      let timeLeft = 3;
+      const timer = setInterval(() => {
+        timeLeft--;
+        countdown.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          window.location.href = "signup.html"; // auto redirect
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

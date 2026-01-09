@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure life with Insurance</title>
+  <style>
+    :root {
+      --primary: #003087;
+      --light: #ffffff;
+      --gray: #f5f7fa;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+     background-color: white;
+     color: black;
+    }
+    /* Add investment banner style */
+     header {
+      background-color: var(--primary);
+      color: var(--light);
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h2{
+      font-size: 32px;
+    }
+    .hero {
+      padding: 80px 20px;
+      text-align: center;
+      height: 200px;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      color: #003087;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      margin-top: 10px;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 40px;
+      background-color: #ffffff;
+    }
+
+    .card {
+      background-color: #f4f4f4;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card img {
+      height: 90px;
+      width:90px;
+      margin-bottom: 15px;
+    }
+
+    .card h3 {
+      color: #003087;
+      font-size: 1.3rem;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      margin: 10px 0;
+    }
+
+    .card button {
+      background-color: #003087;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .card button:hover {
+      background-color: #002060;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      nav a {
+        margin: 0 8px;
+      }
+    }
+    .calculator-container {
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 30px;
+      background: #f4f4f4;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      text-align: center;
+      color: #003087;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #003087;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #002060;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #003087;
+      text-align: center;
+    }
+    .insurance-benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  padding: 50px 20px;
+  background: #ffffff;
+}
+
+.benefit-card {
+  background: #f4f4f4;
+  border-radius: 16px;
+  padding: 30px 25px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+  text-align:center;
+  transition: transform 0.3s ease;
+}
+
+.benefit-card:hover {
+  transform: translateY(-6px);
+}
+
+.benefit-card img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 15px;
+}
+
+.benefit-card h3 {
+  font-size: 1.2rem;
+  color: #2b0a3d;
+  margin-bottom: 10px;
+}
+
+.benefit-card p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.insurance-apply-section {
+      padding: 60px 20px;
+      background: #f4f4f4;
+    }
+
+    .insurance-apply-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: flex-start;
+      align-items: flex-start;
+      max-width: 800px;
+      height: 750px;
+      margin: auto;
+    }
+
+    .insurance-form-container {
+      flex: 1 1 100%;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      text-align: center;
+      color: #003087;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #003087;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #002060;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #003087;
+      text-align: center;
+    }
+    </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+</head>
+
+<body>
+  <!-- Add investment banner -->
+  <header>
+      <h2>Secure Your Future With Confidence</h2>
+      <p>Peace of Mind With Insurance</p>
+  </header>
+  <section class="hero" id="home" data-aos="fade-up">
+    <h1>Explore Types of Insurance</h1>
+    <p>Secure your future with the right coverage</p>
+  </section>
+
+  <section class="cards-container" id="types">
+    <div class="card" data-aos="fade-up">
+      <img src="health.jpg.png" alt="Health" />
+      <h3>Health Insurance</h3>
+      <p>Covers medical expenses and health emergencies.</p>
+      <button onclick="learnMore('Health Insurance')">Learn More</button>
+    </div>
+
+    <div class="card" data-aos="fade-up">
+      <img src="life.jpg.png" alt="Life Insurance" />
+      <h3>Life Insurance</h3>
+      <p>Provides financial support to your family after death.</p>
+      <button onclick="learnMore('Life Insurance')">Learn More</button>
+    </div>
+
+    <div class="card" data-aos="fade-up">
+      <img src="motor.jpg.png" alt="Motor" />
+      <h3>Motor Insurance</h3>
+      <p>Protects your vehicle against accidents and theft.</p>
+      <button onclick="learnMore('Motor Insurance')">Learn More</button>
+    </div>
+
+    <div class="card" data-aos="fade-up">
+      <img src="home.jpg.png" alt="Home" />
+      <h3>Home Insurance</h3>
+      <p>Safeguards your home and property from damage.</p>
+      <button onclick="learnMore('Home Insurance')">Learn More</button>
+    </div>
+
+    <div class="card" data-aos="fade-up">
+      <img src="travel.jpg.png" alt="Travel" />
+      <h3>Travel Insurance</h3>
+      <p>Helps cover travel risks like cancellation or baggage loss.</p>
+      <button onclick="learnMore('Travel Insurance')">Learn More</button>
+    </div>
+
+    <div class="card" data-aos="fade-up">
+      <img src="business2.jpg.png" alt="Business" />
+      <h3>Business Insurance</h3>
+      <p>Protects your company from losses and liabilities.</p>
+      <button onclick="learnMore('Business Insurance')">Learn More</button>
+    </div>
+  </section>
+  <div class="calculator-container">
+    <h1>Insurance Premium Calculator</h1>
+    <form id="insuranceForm">
+      <label for="coverage">Coverage Amount (₹)</label>
+      <input type="number" id="coverage" required />
+
+      <label for="age">Age</label>
+      <input type="number" id="age" required />
+
+      <label for="term">Term Length (years)</label>
+      <input type="number" id="term" required />
+
+      <label for="type">Insurance Type</label>
+      <select id="type" required>
+        <option value="life">Life Insurance</option>
+        <option value="health">Health Insurance</option>
+        <option value="motor">Motor Insurance</option>
+        <option value="motor">Home Insurance</option>
+        <option value="motor">Travel Insurance</option>
+        <option value="motor">Business Insurance</option>
+      </select>
+
+      <button type="submit">Calculate Premium</button>
+    </form>
+    <div class="result" id="result"></div>
+  </div>
+  <section class="insurance-benefits">
+  <div class="benefit-card">
+    <img src="protect_saving.jpg.png" alt="Protect your savings" />
+    <h3>Protect your savings</h3>
+    <p>Insurance helps protect your savings by shielding you from unexpected financial expenses.</p>
+  </div>
+  <div class="benefit-card">
+    <img src="secure_family.jpg.png" alt="Secure your family’s future" />
+    <h3>Secure your family’s future</h3>
+    <p>Insurance offers financial security and peace of mind, ensuring that your family is protected in times of need.</p>
+  </div>
+  <div class="benefit-card">
+    <img src="save_tax.jpg.png" alt="Save tax" />
+    <h3>Save tax</h3>
+    <p>Insurance helps save taxes by offering exemptions and deductions, maximising your savings & ensuring financial stability.</p>
+  </div>
+  <div class="benefit-card">
+    <img src="legal_protection.jpg.png" alt="Offers legal protection" />
+    <h3>Offers legal protection</h3>
+    <p>Sometimes, it's a law to have active insurance products like bike or car insurance to avoid traffic challans.</p>
+  </div>
+</section>
+<section class="insurance-apply-section">
+    <div class="insurance-apply-container">
+      <div class="insurance-form-container">
+        <h1>Apply for Insurance</h1>
+        <form id="insuranceForm">
+          <label for="fullname">Full Name</label>
+          <input type="text" id="fullname" required />
+
+          <label for="email">Email Address</label>
+          <input type="email" id="email" required />
+
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" required />
+
+          <label for="type">Insurance Type</label>
+          <select id="type" required>
+            <option value="life">Life Insurance</option>
+            <option value="health">Health Insurance</option>
+            <option value="motor">Motor Insurance</option>
+            <option value="travel">Travel Insurance</option>
+            <option value="home">Home Insurance</option>
+            <option value="business">Business Insurance</option>
+          </select>
+
+          <label for="message">Additional Notes</label>
+          <textarea id="message" rows="4"></textarea>
+
+          <button type="submit">Submit Application</button>
+        </form>
+        <div class="result" id="insuranceResult"></div>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 1000 });
+
+    function learnMore(type) {
+      alert("You clicked on " + type);
+    }
+    document.getElementById('insuranceForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const coverage = parseFloat(document.getElementById('coverage').value);
+      const age = parseInt(document.getElementById('age').value);
+      const term = parseInt(document.getElementById('term').value);
+      const type = document.getElementById('type').value;
+
+      if (coverage <= 0 || age <= 0 || term <= 0) {
+        document.getElementById('result').textContent = 'Please enter valid input values.';
+        return;
+      }
+
+      let baseRate;
+      switch(type) {
+        case 'life': baseRate = 0.0008; break;
+        case 'health': baseRate = 0.0012; break;
+        case 'motor': baseRate = 0.0015; break;
+        default: baseRate = 0.001;
+      }
+
+      const premium = (coverage * baseRate * (term / 10)) + (age * 2);
+      document.getElementById('result').textContent = `Estimated Premium: ₹${premium.toFixed(2)} per year`;
+    });
+    document.getElementById('insuranceForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('fullname').value;
+      const type = document.getElementById('type').value;
+      document.getElementById('insuranceResult').textContent = `Thank you, ${name}. Your insurance application for ${type} has been submitted!`;
+      this.reset();
+    });
+  </script>

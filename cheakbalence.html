@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Check Balance - NetPay</title>
+  <style>
+    :root {
+      --primary-color: #003087;
+      --light-bg: #f0f4ff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      color: #333;
+      background: white;
+    }
+     header {
+      background-color: #003087;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 30px;
+      height:74px;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+    }
+    .container {
+      max-width: 1400px;
+      background: white;
+      margin-top: 50px;
+      margin-left: 65px;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .bank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .bank {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 8px;
+      padding: 12px 15px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 25px;
+      font-weight: 3rem;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .bank:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 24px rgba(47, 24, 87, 0.2);
+    }
+    .bank_img{
+     height: 63px;
+     width: 75px;
+    }
+    .bank_pho{
+      height:50px;
+      width: 50px;
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+
+    .loading, .balance-box {
+      text-align: center;
+      margin-top: 25px;
+      display: none;
+    }
+
+    .loader {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #003087;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      margin: 20px auto;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .balance {
+      font-size: 22px;
+      color: green;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .info {
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <header> <h1>🏦 Check Account Balance</h1></header>
+  <div class="container">
+    <div class="bank-list">
+      <div class="bank" onclick="checkbalance('SBI - State Bank of India')">
+        <img src="sbi3.jpg"class="bank_pho" /> 
+        <span>SBI - State Bank of India</span>
+      </div>
+      <div class="bank" onclick="checkbalance('Axis Bank')">
+        <img src="axis4.jpg"class="bank_pho" /> 
+        <span>Axis Bank</span>
+      </div>
+      <div class="bank" onclick="checkbalance('HDFC Bank')">
+        <img src="hdfc3.jpg"class="bank_img" />
+        <span>HDFC Bank</span>
+      </div>
+      <div class="bank" onclick="checkbalance('ICICI Bank')">
+        <img src="icici2.jpg"class="bank_img" />
+        <span>ICICI Bank</span>
+      </div>
+      <div class="bank" onclick="checkbalance('Bank of Baroda')">
+        <img src="boroda.jpg"class="bank_img" />
+        <span>Bank of Baroda</span>
+      </div>
+      <div class="bank" onclick="checkbalance('Kotak Mahindra Bank')">
+        <img src="kotak.jpg"class="bank_pho" />
+        <span>Kotak Mahindra Bank</span>
+      </div>
+      <div class="bank" onclick="checkbalance('JP Morgan')">
+        <img src="jp_morgan1.jpg"class="bank_img" />        
+        <span>JP Morgan Chase </span>
+      </div>
+    </div>
+
+    <div class="loading" id="loadingbox">
+      <div class="loader"></div>
+      <p class="info">Fetching balance...</p>
+    </div>
+
+    <div class="balance-box" id="balancebox">
+      <p class="info" id="bankname"></p>
+      <p class="balance" id="balancevalue">Your balance is ₹0.00</p>
+    </div>
+  </div>
+
+  <script>
+     const BASE_URL = "http://localhost:5002"; // backend port connection
+
+  async function checkbalance(bank) {
+    const userpin = prompt(`🔐 enter your 4-digit pin to view balance for ${bank}:`);
+    if (!userpin) return;
+
+    document.getElementById("balancebox").style.display = "none";
+    document.getElementById("loadingbox").style.display = "block";
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/checkbalances/check-balance`, {
+        method: "post",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ bankname: bank, pin: userpin })
+      });
+
+      const data = await res.json();
+      document.getElementById("loadingbox").style.display = "none";
+
+      if (!data.success) {
+        alert("❌ " + data.message);
+        return;
+      }
+
+      document.getElementById("balancebox").style.display = "block";
+      document.getElementById("bankname").textContent = `✅ ${data.bankname} account`;
+      document.getElementById("balancevalue").textContent = `your balance is ₹${data.balance}`;
+    } catch (err) {
+      console.error(err);
+      alert("⚠️ server error, check your backend");
+    }
+  }
+  </script>
+</body>
+</html>

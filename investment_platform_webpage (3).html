@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investify - Investment Platform</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #003087;
+      --light: #ffffff;
+      --gray: #f5f7fa;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      background: var(--gray);
+      color: #333;
+    }
+    header {
+      background-color: var(--primary);
+      color: var(--light);
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .dashboard {
+      background: var(--light);
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 8px var(--shadow);
+    }
+    .dashboard h2 {
+      color: var(--primary);
+    }
+    .summary {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .card-top {
+      flex: 1;
+      min-width: 200px;
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px var(--shadow);
+      text-align: center;
+      
+    }
+    .chart-container {
+      margin: 2rem auto;
+      max-width: 400px;
+    }
+    .cta {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .cta button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      background-color: var(--primary);
+      cursor: pointer;
+      transition: background 0.3s ease;
+      font-size: 1rem;
+    }
+    .cta button:hover {
+      background-color: #002060;
+    }
+    
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 25px;
+    }
+
+    .card {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 30px 20px;
+      height:270px ;
+      width: 257px;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .icon-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+    }
+
+    .icon {
+      font-size: 26px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      margin: 10px 0 8px;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .explore-button {
+      border: 1px solid #003087;
+      background: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      color: #003087;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .explore-button:hover {
+      background-color: #003087;
+      color: #fff;
+    }
+
+    .calculators {
+      background: #fff;
+      margin-top: 3rem;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px var(--shadow);
+    }
+    .calculator-section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: var(--gray);
+      border-radius: 10px;
+      box-shadow: 0 2px 6px var(--shadow);
+      margin-top: 20px;
+    }
+    .calculator-section input {
+      padding: 1rem;
+      margin: 1rem;
+      width: 180px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .calculator-section button {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .result-box {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      text-align: center;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+    @media(max-width: 768px) {
+      .summary, .cta, .invest-options {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+    .container-inv {
+      max-width: 1200px;
+      height:550px;
+      margin: auto;
+      background: var(--gray);
+      border-radius: 20px;
+      padding: 40px;
+    }
+
+    .results {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 50px;
+    }
+
+    .results div {
+      margin: 20px 0;
+     
+      
+    }
+
+    .results h4 {
+      margin: 0;
+      font-size: 24px;
+      color: #555;
+      
+      
+    }
+
+    .results p {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #000;
+    }
+
+    .chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      height: 350px;
+      border-top: 2px solid #eee;
+      padding-top: 40px;
+    }
+
+    .bar {
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .bar-inner {
+      width: 100%;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .label {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    .container-chart {
+      max-width: 1200px;
+      height: 500px;
+      margin: auto;
+      background: var(--gray);
+      border-radius: 12px;
+      padding: 20px;
+      
+    }
+
+    .results {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .results div {
+      flex: 1 1 45%;
+      margin: 6px 0;
+    }
+
+    .results h4 {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+    }
+
+    .results p {
+      font-size: 20px;
+      font-weight: bold;
+      color: #000;
+      margin: 4px 0;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 400px !important;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Invest Today, Gain Tomorrow</h1>
+    <p>Your personalized investment dashboard</p>
+  </header>
+  <div class="container">
+    <div class="dashboard">
+      <h2>Hello, Shubhendu 👋</h2>
+      <div class="summary">
+        <div class="card-top">
+          <h3>Total Invested</h3>
+          <p>₹ 2,50,000</p>
+        </div>
+        <div class="card-top">
+          <h3>Total Returns</h3>
+          <p>₹ 38,500</p>
+        </div>
+        <div class="card-top">
+          <h3>Active SIPs</h3>
+          <p>5</p>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="portfolioChart"></canvas>
+      </div>
+      <div class="cta">
+        <button>Start Investing</button>
+        <button>View Portfolio</button>
+      </div>
+    </div>
+
+    <h2 style="margin-top: 3rem; color: var(--primary);">Explore Investment Options</h2>
+    <div class="card-container">
+
+    <div class="card">
+      <div class="icon-circle" style="background-color: #e0edff;">
+        <span class="icon">📊</span>
+      </div>
+      <h3>Mutual Funds</h3>
+      <p>Professionally managed investment portfolios </p>
+      <button class="explore-button">Explore</button>
+    </div>
+
+    <div class="card">
+      <div class="icon-circle" style="background-color: #dcfce7;">
+        <span class="icon">📈</span>
+      </div>
+      <h3>Stocks</h3>
+      <p>Invest directly in companies with zero fees</p>
+      <button class="explore-button">Explore</button>
+    </div>
+
+    <div class="card">
+      <div class="icon-circle" style="background-color: #fef9c3;">
+        <span class="icon">⚡</span>
+      </div>
+      <h3>Digital Gold</h3>
+      <p>Buy 24K gold online and store it securely with us</p>
+      <button class="explore-button">Explore</button>
+    </div>
+
+    <div class="card">
+      <div class="icon-circle" style="background-color: #f3e8ff;">
+        <span class="icon">💳</span>
+      </div>
+      <h3>Fixed Deposits</h3>
+      <p>Secure investments with guaranteed returns</p>
+      <button class="explore-button">Explore</button>
+    </div>
+
+    <div class="card">
+      <div class="icon-circle" style="background-color: #fee2e2;">
+        <span class="icon">💼</span>
+      </div>
+      <h3>Retirement Plans</h3>
+      <p>Secure your future with tax-efficient solutions</p>
+      <button class="explore-button">Explore</button>
+    </div>
+
+  </div>
+
+    <div class="calculators">
+      <h2 style="color: var(--primary);">Investment Calculators</h2>
+
+      <div class="calculator-section">
+        <h3>📈 Compound Interest Calculator</h3>
+        <input type="number" id="principal" placeholder="Principal (₹)">
+        <input type="number" id="rate" placeholder="Rate (%)">
+        <input type="number" id="years" placeholder="Years">
+        <button onclick="calculateCompoundInterest()">Calculate</button>
+        <div id="compoundResult" class="result-box"></div>
+    <div class="container-inv"> 
+      <div class="results">
+      <div>
+        <h4>Future Value:</h4>
+        <p>$32,620.78</p>
+      </div>
+      <div>
+        <h4>Total Contributions:</h4>
+        <p>$22,000.00</p>
+      </div>
+      <div>
+        <h4>Total Interest:</h4>
+        <p>$10,620.78</p>
+      </div>
+      </div>
+
+      <div class="chart">
+      <div class="bar">
+        <div class="bar-inner" style="height: 260px; background-color: #67b4f4;"></div>
+        <div class="label">Principal</div>
+      </div>
+      <div class="bar">
+        <div class="bar-inner" style="height: 310px; background-color: #90d7a1;"></div>
+        <div class="label">Contributions</div>
+      </div>
+      <div class="bar">
+        <div class="bar-inner" style="height: 240px; background-color: #f5b27d;"></div>
+        <div class="label">Interest</div>
+      </div>
+    </div>
+  </div>
+      </div>
+
+      <div class="calculator-section">
+        <h3>🎯 Retirement Calculator</h3>
+        <input type="number" id="currentAge" placeholder="Current Age">
+        <input type="number" id="retireAge" placeholder="Retirement Age">
+        <input type="number" id="monthlySaving" placeholder="Monthly Saving (₹)">
+        <input type="number" id="expectedRate" placeholder="Annual Return (%)">
+        <button onclick="calculateRetirement()">Calculate</button>
+        <div id="retirementResult" class="result-box"></div>
+
+        <div class="container-chart">
+    <div class="results">
+      <div>
+        <h4>Retirement Savings:</h4>
+        <p>$1,437,810.24</p>
+      </div>
+      <div>
+        <h4>Monthly Income:</h4>
+        <p>$5,990.88</p>
+      </div>
+    </div>
+
+    <canvas id="retirementChart"></canvas>
+  </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    
+  const btz = document.getElementById('retirementChart').getContext('2d');
+    new Chart(btz, {
+      type: 'line',
+      data: {
+        labels: [35, 40, 45, 50, 55, 60, 65],
+        datasets: [{
+          label: 'Savings',
+          data: [100000, 160000, 280000, 450000, 700000, 1050000, 1437810.24],
+          backgroundColor: 'rgba(34, 197, 94, 0.2)',
+          borderColor: '#22c55e',
+          pointBackgroundColor: '#22c55e',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '$' + value.toLocaleString();
+              },
+              font: {
+                size: 10
+              }
+            }
+          },
+          x: {
+            ticks: {
+              font: {
+                size: 10
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return '$' + context.raw.toLocaleString();
+              }
+            }
+          }
+        }
+      }
+    });
+
+
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
+    const portfolioChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Mutual Funds', 'Stocks', 'FDs', 'Gold', 'Others'],
+        datasets: [{
+          label: 'Portfolio Allocation',
+          data: [40, 25, 15, 10, 10],
+          backgroundColor: ['#003087', '#0056b3', '#007bff', '#339af0', '#74c0fc'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+
+    function calculateCompoundInterest() {
+      const p = parseFloat(document.getElementById('principal').value);
+      const r = parseFloat(document.getElementById('rate').value) / 100;
+      const t = parseFloat(document.getElementById('years').value);
+      if (!isNaN(p) && !isNaN(r) && !isNaN(t)) {
+        const amount = p * Math.pow(1 + r, t);
+        document.getElementById('compoundResult').innerText = `Future Value: ₹ ${amount.toFixed(2)}`;
+      }
+    }
+
+    function calculateRetirement() {
+      const currentAge = parseInt(document.getElementById('currentAge').value);
+      const retireAge = parseInt(document.getElementById('retireAge').value);
+      const saving = parseFloat(document.getElementById('monthlySaving').value);
+      const annualReturn = parseFloat(document.getElementById('expectedRate').value) / 100;
+      const months = (retireAge - currentAge) * 12;
+      if (!isNaN(currentAge) && !isNaN(retireAge) && !isNaN(saving) && !isNaN(annualReturn)) {
+        const monthlyRate = annualReturn / 12;
+        const futureValue = saving * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+        document.getElementById('retirementResult').innerText = `Estimated Retirement Corpus: ₹ ${futureValue.toFixed(2)}`;
+      }
+    }
+
+    
+  </script>
+</body>
+</html>

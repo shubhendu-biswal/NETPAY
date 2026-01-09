@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DTH Recharge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #003087;
+      --light-bg: #f5f8ff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      color: #333;
+      background-color: white;
+    }
+     header {
+      background-color: #003087;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 30px;
+      height:74px;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      
+    }
+    .container {
+      max-width: 1400px;
+      margin-bottom: 30px;
+      margin-left: 60px;
+      background: white;
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      transition: border 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .plans {
+      margin-top: 20px;
+    }
+
+    .plan-card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      background: #fafafa;
+      transition: transform 0.2s;
+    }
+
+    .plan-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .plan-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .plan-price {
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .submit-btn {
+      background: var(--primary-color);
+      color: white;
+      font-weight: bold;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .confirmation {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #e0f9e0;
+      color: #2d7f2d;
+    }
+
+    .history {
+      margin-top: 30px;
+    }
+
+    .history table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history th, .history td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .receipt-btn {
+      margin-top: 20px;
+      background: #009688;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .plan-card {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header><h1>DTH Recharge</h1></header>
+  <div class="container">
+    <form id="dthForm">
+      <label for="operator">DTH Operator</label>
+      <select id="operator" required>
+        <option value="">-- Select Operator --</option>
+        <option>Tata Play</option>
+        <option>Airtel DTH</option>
+        <option>Dish TV</option>
+        <option>Sun Direct</option>
+        <option>Videocon D2H</option>
+      </select>
+
+      <label for="customerId">Customer ID / Subscriber Number</label>
+      <input type="text" id="customerId" placeholder="Enter Subscriber Number" required>
+
+      <label for="amount">Recharge Amount (₹)</label>
+      <input type="number" id="amount" placeholder="Enter amount" required>
+
+      <div class="plans">
+        <h3>Popular Plans</h3>
+        <div class="plan-card">
+          <div class="plan-info">
+            <span>HD Combo Pack</span>
+            <small>Validity: 30 Days</small>
+          </div>
+          <div class="plan-price">₹299</div>
+        </div>
+        <div class="plan-card">
+          <div class="plan-info">
+            <span>Family Entertainment</span>
+            <small>Validity: 28 Days</small>
+          </div>
+          <div class="plan-price">₹249</div>
+        </div>
+        <div class="plan-card">
+          <div class="plan-info">
+            <span>Sports HD Pack</span>
+            <small>Validity: 30 Days</small>
+          </div>
+          <div class="plan-price">₹349</div>
+        </div>
+      </div>
+
+      <button class="submit-btn" type="submit">Recharge Now</button>
+    </form>
+
+    <div id="confirmation" class="confirmation"></div>
+
+    <div class="history">
+      <h3>Recharge History</h3>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Operator</th><th>Amount</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          
+        </tbody>
+      </table>
+    </div>
+
+    <button class="receipt-btn" onclick="window.print()">Download/Print Receipt</button>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+  const BASE_URL = "http://localhost:5002/api/dthrecharges";
+
+  async function loadHistory() {
+    const tbody = document.querySelector('.history tbody');
+    tbody.innerHTML = '';
+    try {
+      const res = await fetch(`${BASE_URL}/history`);
+      const data = await res.json();
+      if (data.success && data.recharges.length > 0) {
+        const successfulRecharges = data.recharges.filter(r => r.status === "success");
+        if (successfulRecharges.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5">No history found</td></tr>';
+          return;
+        }
+        successfulRecharges.forEach(r => {
+          const row = `<tr>
+            <td>${new Date(r.date).toLocaleString()}</td>
+            <td>${r.operator}</td>
+            <td>${r.customerId || r.mobileNumber}</td>
+            <td>₹${r.amount}</td>
+            <td>✅ Success</td>
+          </tr>`;
+          tbody.innerHTML += row;
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5">No history found</td></tr>';
+      }
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = '<tr><td colspan="5">Error loading history</td></tr>';
+    }
+  }
+
+  const dthForm = document.getElementById('dthForm');
+  dthForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const operator = document.getElementById('operator').value;
+    const customerId = document.getElementById('customerId').value;
+    const amount = document.getElementById('amount').value;
+    const confirmation = document.getElementById('confirmation');
+
+    if (!operator || !customerId || !amount) {
+      confirmation.style.display = 'block';
+      confirmation.innerText = "❌ Please fill all fields";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BASE_URL}/recharges`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ operator, customerId, amount })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        await fetch(`${BASE_URL}/recharges/${data.recharge._id}/success`, { method: "POST" });
+
+        confirmation.style.display = 'block';
+        confirmation.innerText = `✅ Recharge successful!`;
+
+        dthForm.reset();
+        await loadHistory();
+        setTimeout(() => confirmation.style.display = 'none', 5000);
+      } else {
+        confirmation.style.display = 'block';
+        confirmation.innerText = `❌ ${data.message}`;
+      }
+    } catch (err) {
+      console.error(err);
+      confirmation.style.display = 'block';
+      confirmation.innerText = "❌ Server error. Try again later.";
+    }
+  });
+
+  loadHistory(); // Initial load
+});
+  </script>
+</body>
+</html>

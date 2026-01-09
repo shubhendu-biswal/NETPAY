@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transaction History - Dark Mode</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: white;
+      color: #003087;
+    }
+    header {
+      background-color: #003087;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 30px;
+      height:74px;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+    }
+    .history-container {
+      max-width: 1400px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+    }
+    th {
+      background: white;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tr:nth-child(even) {
+      background: white;
+    }
+    tr:hover {
+      background: white;
+    }
+    .debit {
+      color: red;
+    }
+    .credit {
+      color: green;
+    }
+    @media(max-width: 800px){
+      .history-container { margin: 20px; }
+      table, thead, tbody, tr, th, td { display: block; }
+      thead tr { position: absolute; top: -9999px; }
+      tr {
+        margin-bottom: 12px;
+        border-bottom: 1px solid #333;
+      }
+      td {
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+      }
+      td::before {
+        position: absolute;
+        left: 16px;
+        width: 45%;
+        white-space: nowrap;
+        font-weight: 600;
+        content: attr(data-label);
+        text-align: left;
+      }
+    }
+    .receipt-btn {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      background: #009688;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 1380px;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+<header><h1>Transaction History</h1></header>
+<div class="history-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Bank</th><th>Type</th><th>Amount</th>
+        <th>Ref. #</th><th>Date & Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td data-label="Bank">Axis Bank</td>
+        <td data-label="Type">Debit</td>
+        <td data-label="Amount" class="debit">₹5,000</td>
+        <td data-label="Ref. #">TRX202506201001</td>
+        <td data-label="Date & Time">20 Jun 2025 ‑ 10:35 AM</td>
+      </tr>
+      <tr>
+        <td data-label="Bank">HDFC Bank</td>
+        <td data-label="Type">Credit</td>
+        <td data-label="Amount" class="credit">₹12,000</td>
+        <td data-label="Ref. #">TRX202506200902</td>
+        <td data-label="Date & Time">20 Jun 2025 ‑ 09:02 AM</td>
+      </tr>
+      <!-- More rows... -->
+    </tbody>
+    
+  </table>
+   <button class="receipt-btn" onclick="window.print()">Download/Print Receipt</button>
+</div>
+
+</body>
+</html>

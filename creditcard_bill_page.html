@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Credit Card Bill Payment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #003087;
+      --light-bg: #f0f4ff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      color: #333;
+      background-color: white;
+    }
+    header {
+      background-color: #003087;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 30px;
+      height:74px;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      
+    }
+    .container {
+      max-width: 1400px;
+      margin-bottom: 30px;
+      margin-left: 60px;
+      background: white;
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      transition: border 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .submit-btn {
+      background: var(--primary-color);
+      color: white;
+      font-weight: bold;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .confirmation {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #e0f9e0;
+      color: #2d7f2d;
+    }
+
+    .summary, .history {
+      margin-top: 30px;
+    }
+
+    .summary-box {
+      background: var(--light-bg);
+      padding: 15px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .history table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history th, .history td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .receipt-btn {
+      margin-top: 20px;
+      background: #009688;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      input, select, button {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header><h1>Credit Card Bill Payment</h1></header>
+  <div class="container">
+    <form id="paymentform">
+      <label for="cardProvider">💳 Credit Card Provider</label>
+      <select id="cardProvider" required>
+        <option value="">-- Select Provider --</option>
+        <option>HDFC</option>
+        <option>ICICI</option>
+        <option>SBI</option>
+        <option>Axis</option>
+        <option>Kotak</option>
+        <option>Standard Chartered</option>
+      </select>
+
+      <label for="cardnumber">Card Number</label>
+      <input type="text" id="cardnumber" maxlength="19" placeholder="XXXX XXXX XXXX XXXX" required>
+
+      <label for="cardholder">holder Name</label>
+      <input type="text" id="cardholder" placeholder="Enter full name">
+
+      <label for="billAmount">Bill Amount (₹)</label>
+      <input type="number" step="0.01" id="billAmount" placeholder="Enter bill amount">
+
+      <button class="submit-btn" type="submit">Pay Now</button>
+    </form>
+    
+
+    <div id="confirmation" class="confirmation"></div>
+
+    <div class="summary">
+      <h3>Bill Summary</h3>
+      <div class="summary-box">
+      <p><strong>Cardholder:</strong> <span id="summaryCardholder">--</span></p>
+      <p><strong>Outstanding:</strong> ₹<span id="summaryOutstanding">0</span></p>
+      <p><strong>Due Date:</strong> <span id="summaryDueDate">--</span></p>
+    </div>
+    <div class="history">
+      <h3>Bill Payment History</h3>
+      <table>
+         <thead>
+          <tr><th>Txn ID</th><th>Amount</th><th>Date</th><th>Status</th></tr>
+        </thead>
+        <tbody id="historyTable">
+          <tr><td colspan="4">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="receipt-btn" onclick="window.print()">Download/Print Receipt</button>
+  </div>
+  </div>
+
+  <script>
+ const BASE_URL = "http://localhost:5002"; // backend URL
+
+// Elements
+const cardProviderEl = document.getElementById("cardProvider");
+const cardnumberEl = document.getElementById("cardnumber");
+const cardholderEl = document.getElementById("cardholder");
+const billAmountEl = document.getElementById("billAmount");
+const form = document.getElementById("paymentform");
+const confirmation = document.getElementById("confirmation");
+const historyTable = document.getElementById("historyTable");
+
+// Mini Bill Summary
+const summarycardholder = document.getElementById("summaryCardholder");
+const summaryOutstanding = document.getElementById("summaryOutstanding");
+const summaryDueDate = document.getElementById("summaryDueDate");
+
+let fetchedCard = null;
+
+// ---------------------
+// Auto-format card number
+// ---------------------
+cardnumberEl.addEventListener("input", function(e) {
+  let value = e.target.value.replace(/\D/g, "").substring(0,16);
+  let formatted = value.match(/.{1,4}/g)?.join(" ") || "";
+  e.target.value = formatted;
+
+  if (value.length >= 16 && cardProviderEl.value) {
+    tryFetchCard(e.target.value, cardProviderEl.value); // send with spaces
+  } else {
+    confirmation.style.display = "none";
+    fetchedCard = null;
+  }
+});
+
+// ---------------------
+// Try fetching when provider changes
+// ---------------------
+cardProviderEl.addEventListener("change", () => {
+  if (cardnumberEl.value.replace(/\s+/g, "").length >= 16 && cardProviderEl.value) {
+    tryFetchCard(cardnumberEl.value, cardProviderEl.value);
+  } else {
+    confirmation.style.display = "none";
+    fetchedCard = null;
+  }
+});
+
+// ---------------------
+// Fetch card function
+// ---------------------
+async function tryFetchCard(numberWithSpaces, provider) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/creditcards/fetch`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cardnumber: numberWithSpaces, cardProvider: provider }) // lowercase keys
+    });
+
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || "Card not found");
+
+    fetchedCard = data.bill;
+
+    confirmation.style.display = "block";
+    confirmation.style.background = "#f0f4ff";
+    confirmation.style.color = "#003087";
+    confirmation.innerHTML = `
+      <strong>Card Found!</strong><br>
+      Name: ${fetchedCard.holdername}<br>
+      Due Amount: ₹${fetchedCard.dueAmount}<br>
+      Due Date: ${fetchedCard.dueDate}<br><br>
+      <button id="autoFillBtn">Auto-Fill Details</button>
+    `;
+
+    document.getElementById("autoFillBtn").onclick = () => {
+      cardholderEl.value = fetchedCard.holdername;
+      billAmountEl.value = fetchedCard.dueAmount;
+
+      summarycardholder.innerText = fetchedCard.holdername;
+      summaryOutstanding.innerText = fetchedCard.dueAmount;
+      summaryDueDate.innerText = fetchedCard.dueDate;
+
+      confirmation.style.display = "none";
+
+      loadHistory("creditcard");
+    };
+
+  } catch (err) {
+    confirmation.style.display = "block";
+    confirmation.style.background = "#fdecea";
+    confirmation.style.color = "#d32f2f";
+    confirmation.innerText = "❌ " + err.message + " Enter manually.";
+    fetchedCard = null;
+  }
+}
+
+// ---------------------
+// Handle payment
+// ---------------------
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const provider = cardProviderEl.value.trim();
+  const cardnumber = cardnumberEl.value.trim();
+  const cardholder = cardholderEl.value.trim();
+  const amount = parseFloat(billAmountEl.value);
+
+  if (!provider || !cardnumber || !cardholder || !amount) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/payments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "creditcard",
+        reference: cardnumber,
+        amount: amount
+      })
+    });
+
+    const data = await res.json();
+    if (!data || !data.payment) throw new Error("Payment failed");
+
+    confirmation.style.display = "block";
+    confirmation.style.background = "#e0f9e0";
+    confirmation.style.color = "#2d7f2d";
+    confirmation.innerText = 
+      `✅ Payment Successful!\nTxn ID: ${data.payment._id}\nAmount: ₹${data.payment.amount}`;
+
+    form.reset();
+    summarycardholder.innerText = "--";
+    summaryOutstanding.innerText = "0";
+    summaryDueDate.innerText = "--";
+
+    loadHistory("creditcard");
+
+  } catch (err) {
+    confirmation.style.display = "block";
+    confirmation.style.background = "#fdecea";
+    confirmation.style.color = "#d32f2f";
+    confirmation.innerText = "❌ " + err.message;
+  }
+});
+
+// ---------------------
+// Load payment history
+// ---------------------
+async function loadHistory(type) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/payments/history?type=${type}`);
+    const data = await res.json();
+
+    const payments = Array.isArray(data) ? data : (data.history || []);
+
+    historyTable.innerHTML = "";
+    if (payments.length === 0) {
+      historyTable.innerHTML = `<tr><td colspan="4">No history found</td></tr>`;
+      return;
+    }
+
+    payments.forEach(p => {
+      const row = `
+        <tr>
+          <td>${new Date(p.date).toLocaleDateString()}</td>
+          <td>${p.reference}</td>
+          <td>₹${p.amount}</td>
+          <td>${p.status}</td>
+        </tr>
+      `;
+      historyTable.innerHTML += row;
+    });
+
+  } catch (err) {
+    historyTable.innerHTML = `<tr><td colspan="4">Error loading history</td></tr>`;
+    console.error(err);
+  }
+}
+
+// ---------------------
+// Load history on page load
+// ---------------------
+window.onload = () => {
+  loadHistory("creditcard");
+};
+
+  </script>
+</body>
+</html>

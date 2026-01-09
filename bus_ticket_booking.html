@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bus Ticket Booking - BusEase</title>
+  <style>
+    :root {
+      --primary: #003087;
+      --light: #ffffff;
+      --gray: #f8f9fa;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      background: var(--gray);
+      color: #333;
+    }
+    header {
+      background-color: var(--primary);
+      color: var(--light);
+      text-align: center;
+      padding: 1rem 0;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px var(--shadow);
+    }
+    h2 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+    form {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    input, select {
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      grid-column: span 2;
+      padding: 0.75rem;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #002060;
+    }
+    .results {
+      margin-top: 2rem;
+    }
+    .bus-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+    .bus-info h3 {
+      color: var(--primary);
+    }
+    .book-btn {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bus Ticket Booking</h1>
+  </header>
+  <div class="container">
+    <h2>Search Buses</h2>
+    <form id="busForm">
+      <input type="text" name="from" placeholder="from City">
+      <input type="text" name="to" placeholder="to City">
+      <input type="date" name="departureDate"/>
+      <select>
+        <option value="1">1 Passenger</option>
+        <option value="2">2 Passengers</option>
+        <option value="3">3 Passengers</option>
+        <option value="4">4+ Passengers</option>
+      </select>
+      <select required>
+        <option value="sleeper">Sleeper</option>
+        <option value="seater">Seater</option>
+        <option value="ac">AC</option>
+        <option value="non-ac">Non-AC</option>
+      </select>
+      <button type="submit">Search Buses</button>
+    </form>
+    <div class="results" id="busResults"></div>
+  </div>
+
+  <script>
+ const BASE_URL = "http://localhost:5002";
+
+document.getElementById("busForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const from = this.from.value;
+  const to = this.to.value;
+  const departureDate = this.departureDate.value;
+
+  try {
+    const res = await fetch(
+      `${BASE_URL}/api/buses/search?from=${from}&to=${to}&departureDate=${departureDate}`,
+      {
+        headers: { "Cache-Control": "no-cache" },
+      }
+    );
+
+    const buses = await res.json();
+    const resultsDiv = document.getElementById("busResults");
+
+    resultsDiv.innerHTML = buses.length
+      ? buses
+          .map(
+            (b) => `
+        <div class="bus-card">
+          <div class="bus-info">
+            <h3>${b.operator} (${b.busNumber})</h3>
+            <p>${b.from} → ${b.to}</p>
+            <p>Departure: ${b.departureTime} | Arrival: ${b.arrivalTime}</p>
+            <p>Type: ${b.busType || "N/A"}</p>
+            <strong>Price: ₹${b.price}</strong>
+          </div>
+          <button class="book-btn">Book</button>
+        </div>
+      `
+          )
+          .join("")
+      : "<p>No buses found</p>";
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loan EMI Payment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #003087;
+      --light-bg: #f0f4ff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      
+      color: #333;
+      background-color: white;
+    }
+    
+    header {
+      background-color: #003087;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 30px;
+      height:74px;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      
+    }
+    .container {
+      max-width: 1400px;
+      margin-bottom: 30px;
+      margin-left: 60px;
+      background: white;
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      transition: border 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .submit-btn {
+      background: var(--primary-color);
+      color: white;
+      font-weight: bold;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .confirmation {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #e0f9e0;
+      color: #2d7f2d;
+    }
+
+    .summary, .history {
+      margin-top: 30px;
+    }
+
+    .summary-box {
+      background: var(--light-bg);
+      padding: 15px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .history table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history th, .history td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .receipt-btn {
+      margin-top: 20px;
+      background: #009688;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      input, select, button {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header><h1>Loan EMI Payment</h1></header>
+  <div class="container">
+    <form id="loanForm">
+      <label for="loanProvider">🏦 Loan Provider</label>
+      <select id="loanProvider" required>
+        <option value="">-- Select Provider --</option>
+        <option>HDFC Bank</option>
+        <option>SBI Bank</option>
+        <option>ICICI Bank</option>
+        <option>Axis Bank</option>
+        <option>Kotak Mahindra Bank</option>
+        <option>Bajaj Finance</option>
+      </select>
+
+      <label for="accountNumber">Loan Account Number</label>
+      <input type="text" id="accountNumber" maxlength="16" pattern="\d{10,16}" required placeholder="Enter 10-16 digit account number" />
+
+      <label for="emiAmount">EMI Amount (₹)</label>
+      <input type="number" step="0.01" id="emiAmount" placeholder="Enter EMI amount"/>
+
+      <label for="dueDate">Due Date</label>
+      <input type="date" id="dueDate" />
+
+      <button class="submit-btn" type="submit">Pay EMI Now</button>
+    </form>
+
+    <div id="confirmation" class="confirmation"></div>
+
+    <div class="summary">
+      <h3>Mini EMI Summary</h3>
+      <div class="summary-box" id="emiSummary" style="display:none;">
+       <p><strong>Customer:</strong> <span id="summaryCustomer">--</span></p>
+       <p><strong>EMI Amount:</strong> <span id="summaryEMI">0</span></p>
+       <p><strong>Due Date:</strong> <span id="summaryDueDate">--</span></p>
+      </div>
+    </div>
+
+    <div class="history">
+      <h3>Payment History</h3>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Provider</th><th>Amount</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          
+        </tbody>
+      </table>
+    </div>
+
+    <button class="receipt-btn" onclick="window.print()">Download/Print Receipt</button>
+  </div>
+
+  <script>
+   const BASE_URL = "http://localhost:5002";
+
+const loanProviderEl = document.getElementById("loanProvider");
+const accountNumberEl = document.getElementById("accountNumber");
+const emiAmountEl = document.getElementById("emiAmount");
+const dueDateEl = document.getElementById("dueDate");
+const form = document.getElementById("loanForm");
+const confirmation = document.getElementById("confirmation");
+const historyTable = document.querySelector(".history tbody");
+
+let fetchedLoan = null;
+
+// Fetch loan if ready
+function fetchLoanIfReady() {
+  const accNum = accountNumberEl.value.trim();
+  const provider = loanProviderEl.value;
+  if (accNum && provider) tryFetchLoan(provider, accNum);
+  else { confirmation.style.display="none"; fetchedLoan=null; }
+}
+
+accountNumberEl.addEventListener("input", fetchLoanIfReady);
+loanProviderEl.addEventListener("change", fetchLoanIfReady);
+
+// Fetch loan
+async function tryFetchLoan(provider, accountNumber) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/loans/fetch`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({loanProvider:provider, accountNumber})
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || "Loan not found");
+
+    fetchedLoan = data.loan;
+    confirmation.style.display="block";
+    confirmation.style.background="#f0f4ff";
+    confirmation.style.color="#003087";
+    confirmation.innerHTML = `
+      <strong>Loan Found!</strong><br>
+      Customer: ${fetchedLoan.customerName || "--"}<br>
+      EMI: ₹${fetchedLoan.emiAmount}<br>
+      Due Date: ${new Date(fetchedLoan.dueDate).toLocaleDateString()}<br>
+      <button type="button" id="autoFillBtn">Auto-Fill Details</button>
+    `;
+
+    document.getElementById("autoFillBtn").addEventListener("click", () => {
+      emiAmountEl.value = fetchedLoan.emiAmount;
+      dueDateEl.value = new Date(fetchedLoan.dueDate).toISOString().split("T")[0];
+      confirmation.style.display="none";
+      loadHistory(fetchedLoan.accountNumber);
+    });
+
+  } catch(err) {
+    confirmation.style.display="block";
+    confirmation.style.background="#fdecea";
+    confirmation.style.color="#d32f2f";
+    confirmation.innerText = "❌ "+err.message+" Enter manually.";
+    fetchedLoan=null;
+  }
+}
+
+// Handle payment
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!fetchedLoan) return alert("Please fetch loan details first");
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/loans/pay/${fetchedLoan._id}`, { method:"POST" });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || "Payment failed");
+
+    confirmation.style.display="block";
+    confirmation.style.background="#e0f9e0";
+    confirmation.style.color="#2d7f2d";
+    confirmation.innerText = `✅ Payment Successful!\nLoan: ${fetchedLoan.loanProvider}\nEMI: ₹${fetchedLoan.emiAmount}`;
+    form.reset();
+
+    // Populate history immediately
+    if (data.payments) populateHistory(data.payments);
+    else loadHistory(fetchedLoan.accountNumber);
+
+  } catch(err) {
+    confirmation.style.display="block";
+    confirmation.style.background="#fdecea";
+    confirmation.style.color="#d32f2f";
+    confirmation.innerText = "❌ "+err.message;
+  }
+});
+
+// Load history
+async function loadHistory(accountNumber) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/loans/history/${accountNumber}`);
+    const data = await res.json();
+    populateHistory(data.history || []);
+  } catch (err) {
+    historyTable.innerHTML = `<tr><td colspan="4">Error loading history</td></tr>`;
+    console.error(err);
+  }
+}
+
+function populateHistory(payments) {
+  historyTable.innerHTML = "";
+  if (!payments || payments.length === 0) {
+    historyTable.innerHTML = `<tr><td colspan="4">No history found</td></tr>`;
+    return;
+  }
+
+  payments.forEach(p => {
+    historyTable.innerHTML += `
+      <tr>
+        <td>${new Date(p.date).toLocaleDateString()}</td>
+        <td>${p.loanProvider || fetchedLoan?.loanProvider || "--"}</td>
+        <td>₹${p.amount}</td>
+        <td>${p.status}</td>
+      </tr>
+    `;
+  });
+}
+
+
+  </script>
+</body>
+</html>

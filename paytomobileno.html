@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pay to Mobile - NetPay</title>
+  <style>
+    :root {
+      --primary-color: #003087;
+      --light-bg: #f0f4ff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      color: #333;
+      background-color: white;  
+    }
+    header {
+      background-color: #003087;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 30px;
+      height:74px;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+    }
+    .container {
+      max-width: 1400px;
+      background: #fff;
+      margin-top: 50px;
+      margin-left: 65px;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    }
+
+    
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    input[type="tel"],
+    input[type="number"],
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      width: 100%;
+      background: #003087;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #002060;
+    }
+
+    .error, .success {
+      margin-top: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .section {
+      margin-top: 25px;
+    }
+
+    .contact-list, .recent-list {
+      list-style: none;
+      padding: 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .contact-item, .recent-item {
+      padding: 10px;
+      background: #f9f9f9;
+      margin-bottom: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .contact-item:hover, .recent-item:hover {
+      background: #e6f0ff;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #777;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header><h1>📱 Pay to Mobile</h1></header>
+  <div class="container">
+    
+    <form onsubmit="return requestPin(event)">
+      <label for="mobile">Mobile Number</label>
+      <input type="tel" id="mobile" placeholder="Enter 10-digit number" required />
+
+      <label for="amount">Amount (₹)</label>
+      <input type="number" id="amount" placeholder="Enter amount" required min="1"/>
+
+      <button type="submit" class="btn">Proceed to Pay</button>
+    </form>
+
+    <div id="message"></div>
+
+    <div class="section">
+      <h3>🔍 Search Contacts</h3>
+      <input type="search" id="searchInput" placeholder="Search by name or number..." onkeyup="filterContacts()" />
+      <ul class="contact-list" id="contactList"></ul>
+    </div>
+
+    <div class="section">
+      <h3>🕘 Recent Payments</h3>
+      <ul class="recent-list" id="recentList"></ul>
+    </div>
+  </div>
+
+  <script>
+ 
+let contacts = []; 
+const recentPayments = [];
+const correctPin = "2005";
+
+// Default fallback contacts
+const defaultContacts = [
+  { name: "Rahul Sharma", number: "9876543210" },
+  { name: "Priya Verma", number: "9123456789" },
+  { name: "Amit Kumar", number: "9988776655" },
+  { name: "Sneha Patel", number: "9090909090" },
+  { name: "Ravi Mehta", number: "8877665544" },
+  { name: "Anjali Singh", number: "9234567890" },
+  { name: "Vikram Rao", number: "9345678901" },
+  { name: "Neha Gupta", number: "9456789012" },
+  { name: "Karan Joshi", number: "9567890123" },
+  { name: "Simran Kaur", number: "9678901234" },
+  { name: "Arjun Malhotra", number: "9789012345" },
+  { name: "Pooja Reddy", number: "9890123456" },
+  { name: "Aditya Nair", number: "9901234567" },
+  { name: "Sakshi Jain", number: "9012345678" },
+  { name: "Rohan Mehra", number: "9123456780" },
+  { name: "Isha Kapoor", number: "9234567891" },
+  { name: "Manish Verma", number: "9345678902" },
+  { name: "Divya Singh", number: "9456789013" },
+  { name: "Ankit Sharma", number: "9567890124" },
+  { name: "Priya Sharma", number: "9678901235" }
+];
+
+// Ensure DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  loadContacts();
+  updateRecentList();
+
+  document.getElementById("searchInput").addEventListener("keyup", filterContacts);
+  document.getElementById("mobile").addEventListener("input", showContactName);
+});
+
+// Fetch contacts from DB or fallback
+async function loadContacts() {
+  try {
+    const res = await fetch(`${BASE_URL}/api/paytomobile/list`);
+    const data = await res.json();
+    if (data.success && data.data.length) {
+      contacts = data.data.map(c => ({ name: c.name, number: c.number.trim() }));
+    } else {
+      contacts = defaultContacts;
+    }
+  } catch (err) {
+    console.error("Error loading contacts, using default list.", err);
+    contacts = defaultContacts;
+  }
+  displayContacts();
+}
+
+// Display full contact list
+function displayContacts() {
+  const list = document.getElementById("contactList");
+  list.innerHTML = "";
+  contacts.forEach(contact => {
+    const item = document.createElement("li");
+    item.className = "contact-item";
+    item.innerHTML = `<span><strong>${contact.name}</strong><br><span class="small">${contact.number}</span></span>`;
+    item.onclick = () => {
+      document.getElementById("mobile").value = contact.number;
+      showContactName();
+    };
+    list.appendChild(item);
+  });
+}
+
+// Filter contacts
+function filterContacts() {
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const listItems = document.querySelectorAll("#contactList li");
+  listItems.forEach(li => {
+    const text = li.innerText.toLowerCase();
+    li.style.display = text.includes(search) ? "flex" : "none";
+    li.style.backgroundColor = text.includes(search) ? "#f0f8ff" : "transparent";
+  });
+}
+
+// Show contact name while typing
+function showContactName() {
+  const mobileInput = document.getElementById("mobile");
+  const number = mobileInput.value.replace(/\D/g, "");
+  const match = contacts.find(c => c.number.replace(/\D/g, "") === number);
+
+  let nameDisplay = document.getElementById("contactNameDisplay");
+  if (!nameDisplay) {
+    nameDisplay = document.createElement("div");
+    nameDisplay.id = "contactNameDisplay";
+    nameDisplay.style.margin = "5px 0 15px 0";
+    nameDisplay.style.fontWeight = "bold";
+    mobileInput.parentNode.insertBefore(nameDisplay, mobileInput.nextSibling);
+  }
+
+  nameDisplay.textContent = match ? `Contact: ${match.name}` : "";
+}
+
+// Recent payments
+function updateRecentList() {
+  const list = document.getElementById("recentList");
+  list.innerHTML = "";
+  recentPayments.slice(0, 5).forEach(entry => {
+    const item = document.createElement("li");
+    item.className = "recent-item";
+    item.innerHTML = `<span><strong>${entry.name || "Unknown"}</strong><br><span class="small">${entry.number}</span></span><span>₹${entry.amount}</span>`;
+    item.onclick = () => {
+      document.getElementById("mobile").value = entry.number;
+      showContactName();
+    };
+    list.appendChild(item);
+  });
+}
+
+// Payment handler
+function requestPin(e) {
+  e.preventDefault();
+  const mobile = document.getElementById("mobile").value.trim();
+  const amount = parseFloat(document.getElementById("amount").value.trim());
+  const messageDiv = document.getElementById("message");
+  messageDiv.textContent = "";
+  messageDiv.className = "";
+
+  if (!/^[6-9]\d{9}$/.test(mobile)) {
+    messageDiv.textContent = "❌ Invalid mobile number.";
+    messageDiv.className = "error";
+    return false;
+  }
+
+  if (isNaN(amount) || amount <= 0) {
+    messageDiv.textContent = "❌ Enter a valid amount.";
+    messageDiv.className = "error";
+    return false;
+  }
+
+  const userPin = prompt("🔐 Enter your 4-digit PIN to confirm:");
+
+  if (userPin === correctPin) {
+    processPayment(mobile, amount);
+  } else {
+    messageDiv.textContent = "❌ Incorrect PIN. Payment cancelled.";
+    messageDiv.className = "error";
+  }
+
+  return false;
+}
+
+// Process payment
+function processPayment(mobile, amount) {
+  const messageDiv = document.getElementById("message");
+
+  const contactMatch = contacts.find(
+    c => c.number.replace(/\D/g, "") === mobile.replace(/\D/g, "")
+  );
+  const contactName = contactMatch ? contactMatch.name : "Unknown";
+
+  recentPayments.unshift({
+    name: contactName,
+    number: mobile,
+    amount: amount.toFixed(2)
+  });
+
+  updateRecentList();
+
+  messageDiv.innerHTML = `✅ ₹${amount.toFixed(2)} sent to <strong>${contactName}</strong> (${mobile}) successfully!`;
+  messageDiv.className = "success";
+
+  document.getElementById("mobile").value = "";
+  document.getElementById("amount").value = "";
+  showContactName(); 
+}
+
+  </script>
+</body>
+</html>

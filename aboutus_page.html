@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Us - NetPay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #ffffff;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    
+
+    .hero {
+      background-color:#003087 ;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .hero h1 {
+      color: white;
+      font-size: 2.5rem;
+    }
+
+    .hero p {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      color: white;
+    }
+
+    section {
+      padding: 3rem 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .features, .team, .milestones {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .features {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      text-align: center;
+    }
+
+    .feature-card {
+      background: #f4f4f4;
+      padding: 2rem;
+      border-radius: 10px;
+    }
+
+    .team {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      text-align: center;
+    }
+
+    .team-member img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+    }
+
+    .milestones {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
+
+    .milestone {
+      background: #f4f4f4;
+      padding: 1rem;
+      border-radius: 8px;
+      flex: 1;
+      margin: 0 1rem;
+    }
+
+    .testimonials {
+      background: #e0f7f4;
+      padding: 2rem;
+      text-align: center;
+      border-radius: 2rem;
+      margin-bottom: 50px;
+    }
+
+    
+
+    @media (max-width: 768px) {
+      .milestones {
+        flex-direction: column;
+      }
+      .milestone {
+        margin: 1rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+
+  <div class="hero">
+    <h1>Simplifying Digital Payments</h1>
+    <p>Secure. Seamless. Smart transactions with NetPay.</p>
+  </div>
+
+  <section>
+    <h2>Our Mission</h2>
+    <p>Empowering users with fast and secure digital payments through innovative financial technology.</p>
+    <h2>Our Vision</h2>
+    <p>To become India’s most trusted digital payment solution provider.</p>
+  </section>
+
+  <section>
+    <h2>Core Features</h2>
+    <div class="features">
+      <div class="feature-card">🔒 Secure Transactions</div>
+      <div class="feature-card">⚡ Instant Transfers</div>
+      <div class="feature-card">🧾 Bill Payments</div>
+      <div class="feature-card">💳 Wallet & UPI Support</div>
+      <div class="feature-card">📱 Mobile App Integration</div>
+      <div class="feature-card">🌐 International Payments</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Our Team</h2>
+    <div class="team">
+      <div class="team-member">
+        <img src="shubhendu_img.jpg.gif" alt="Team Member">
+        <h4>SHUBHENDU BISWAL</h4>
+        <p>CEO</p>
+      </div>
+      <div class="team-member">
+        <img src="ludu2.jpg" alt="Team Member">
+        <h4>SUBHASHISH PRADHAN</h4>
+        <p>CTO</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="milestones">
+    <div class="milestone">
+      <h3>5M+</h3>
+      <p>Users</p>
+    </div>
+    <div class="milestone">
+      <h3>500M+</h3>
+      <p>Transactions Processed</p>
+    </div>
+    <div class="milestone">
+      <h3>50K+</h3>
+      <p>Merchant Partners</p>
+    </div>
+  </section>
+
+  <section class="testimonials">
+    <h2>What Our Users Say</h2>
+    <p>"NetPay is fast and reliable! I use it daily for all my payments." – Priya S.</p>
+    <p>"A truly seamless experience from wallet to bank." – Rohit M.</p>
+  </section>
+
+  
+</body>
+</html>
