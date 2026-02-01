@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NetPay | Login & Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f4f6f9;
+      /* Light gray background */
+      color: #333;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);
+      /* Softer shadow */
+      width: 100%;
+      max-width: 1000px;
+      /* Increased to 800px */
+      transition: transform 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #eef0f2;
+    }
+
+    h1,
+    h2 {
+      text-align: center;
+      color: #003087;
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+
+    .input-group input:focus {
+      border-color: #003087;
+      background-color: #fff;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 48, 135, 0.1);
+    }
+
+    .btn {
+      background-color: #003087;
+      color: white;
+      padding: 14px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background-color: #00225a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 48, 135, 0.2);
+    }
+
+    .bottom-text {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .bottom-text a {
+      color: #003087;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .bottom-text a:hover {
+      text-decoration: underline;
+      color: #00225a;
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+      font-weight: 500;
+      min-height: 20px;
+    }
+
+    /* Form switching logic */
+    .form {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .form.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin: 20px;
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Login Form -->
+    <div class="form active" id="loginForm">
+      <h1>Login for NetPay</h1>
+      <form id="loginFormTag">
+        <div class="input-group">
+          <label for="loginPhone">Phone Number</label>
+          <input type="tel" id="loginPhone" placeholder="Enter 10-digit number" pattern="[0-9]{10}" required />
+        </div>
+        <div class="input-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn">Login</button>
+      </form>
+      <div class="message" id="loginMessage"></div>
+      <div class="bottom-text">
+        Don't have an account? <a onclick="showRegister()">Register Now</a>
+      </div>
+    </div>
+
+    <!-- Register Form -->
+    <div class="form" id="registerForm">
+      <h2>Create Account</h2>
+      <form id="registerFormTag">
+        <div class="input-group">
+          <label for="regName">Full Name</label>
+          <input type="text" id="regName" placeholder="Your Name" required />
+        </div>
+        <div class="input-group">
+          <label for="regPhone">Phone Number</label>
+          <input type="tel" id="regPhone" placeholder="10-digit number" pattern="[0-9]{10}" required />
+        </div>
+        <div class="input-group">
+          <label for="regPassword">Password</label>
+          <input type="password" id="regPassword" placeholder="Create password" required />
+        </div>
+        <div class="input-group">
+          <label for="regConfirmPassword">Confirm Password</label>
+          <input type="password" id="regConfirmPassword" placeholder="Confirm password" required />
+        </div>
+        <button type="submit" class="btn">Register</button>
+      </form>
+      <div class="message" id="regMessage"></div>
+      <div class="bottom-text">
+        Already have an account? <a onclick="showLogin()">Login</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BASE_URL = "http://localhost:5002"; // Backend URL
+
+    // Switch forms
+    function showRegister() {
+      document.getElementById('loginForm').classList.remove('active');
+      document.getElementById('registerForm').classList.add('active');
+      // Clear messages
+      document.getElementById('loginMessage').textContent = '';
+      document.getElementById('regMessage').textContent = '';
+    }
+
+    function showLogin() {
+      document.getElementById('registerForm').classList.remove('active');
+      document.getElementById('loginForm').classList.add('active');
+      // Clear messages
+      document.getElementById('loginMessage').textContent = '';
+      document.getElementById('regMessage').textContent = '';
+    }
+
+    // Login Handler
+    document.getElementById('loginFormTag').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const phone = document.getElementById('loginPhone').value;
+      const password = document.getElementById('loginPassword').value;
+      const messageEl = document.getElementById('loginMessage');
+      const btn = this.querySelector('button');
+
+      if (!/^\d{10}$/.test(phone)) {
+        messageEl.textContent = "Please enter a valid 10-digit phone number";
+        messageEl.style.color = "#dc3545";
+        return;
+      }
+
+      // Loading state
+      btn.textContent = "Logging in...";
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`${BASE_URL}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          messageEl.textContent = "Login Successful! Redirecting...";
+          messageEl.style.color = "#28a745";
+
+          // Store session data
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user)); // Store user object (name, phone)
+
+          // Redirect after short delay
+          setTimeout(() => {
+            window.location.href = "netpay2.html";
+          }, 1000);
+        } else {
+          messageEl.textContent = data.message || "Invalid credentials";
+          messageEl.style.color = "#dc3545";
+          btn.textContent = "Login";
+          btn.disabled = false;
+        }
+
+      } catch (err) {
+        console.error(err);
+        messageEl.textContent = "Server connection failed. Is the backend running?";
+        messageEl.style.color = "#dc3545";
+        btn.textContent = "Login";
+        btn.disabled = false;
+      }
+    });
+
+    // Register Handler
+    document.getElementById('registerFormTag').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('regName').value;
+      const phone = document.getElementById('regPhone').value;
+      const password = document.getElementById('regPassword').value;
+      const confirmPassword = document.getElementById('regConfirmPassword').value;
+      const messageEl = document.getElementById('regMessage');
+      const btn = this.querySelector('button');
+
+      if (!/^\d{10}$/.test(phone)) {
+        messageEl.textContent = "Please enter a valid 10-digit phone number";
+        messageEl.style.color = "#dc3545";
+        return;
+      }
+      if (password.length < 6) {
+        messageEl.textContent = "Password must be at least 6 characters long";
+        messageEl.style.color = "#dc3545";
+        return;
+      }
+      if (password !== confirmPassword) {
+        messageEl.textContent = "Passwords do not match";
+        messageEl.style.color = "#dc3545";
+        return;
+      }
+
+      // Loading state
+      btn.textContent = "Creating Account...";
+      btn.disabled = true;
+
+      try {
+        // Note: Adjust the payload if backend expects 'name'
+        const response = await fetch(`${BASE_URL}/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, phone, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) { // Assuming backend returns success: true
+          messageEl.textContent = "Account created successfully!";
+          messageEl.style.color = "#28a745";
+
+          setTimeout(() => {
+            showLogin();
+            btn.textContent = "Register";
+            btn.disabled = false;
+          }, 1500);
+
+        } else {
+          messageEl.textContent = data.message || "Registration failed";
+          messageEl.style.color = "#dc3545";
+          btn.textContent = "Register";
+          btn.disabled = false;
+        }
+
+      } catch (err) {
+        console.error(err);
+        messageEl.textContent = "Server connection failed.";
+        messageEl.style.color = "#dc3545";
+        btn.textContent = "Register";
+        btn.disabled = false;
+      }
+    });
+
+    // Check if already logged in
+    if (localStorage.getItem('token')) {
+      // Optional: Redirect if already logged in, or provide a logout button
+      // For now, we'll just redirect to dashboard for convenience
+      window.location.href = "netpay2.html";
+    }
+  </script>
+
+</body>
+
+</html>

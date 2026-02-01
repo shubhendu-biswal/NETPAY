@@ -16,7 +16,8 @@ const app = express();
 // ------------------------
 // Middleware
 // ------------------------
-app.use(express.json());
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ limit: '20mb', extended: true }));
 app.use(cors());
 app.use(morgan("dev"));
 
@@ -39,7 +40,7 @@ const mobilerechargeRoutes = require('./routes/mobilerecharges');
 const dthrechargeRoutes = require('./routes/dthrecharges');
 const fastagRoutes = require("./routes/fastags");
 const loanRoutes = require("./routes/loans");
-const bankaccountRoutes = require("./routes/bankaccounts"); 
+const bankaccountRoutes = require("./routes/bankaccounts");
 const checkbalanceRoutes = require("./routes/checkbalances");
 
 

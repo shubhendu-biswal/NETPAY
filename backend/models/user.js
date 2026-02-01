@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 1000, // initial balance
   },
+  profileImage: {
+    type: String, // URL or base64 string
+    default: "",
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);
